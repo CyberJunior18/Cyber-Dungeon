@@ -1,47 +1,50 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Zap, Terminal, Database, Cpu, Globe, Flag, CheckCircle, ChevronRight, AlertTriangle } from 'lucide-react';
+import { Shield, Zap, Terminal, Database, Cpu, Globe, Flag, CheckCircle, ChevronRight, AlertTriangle, Download } from 'lucide-react';
 
 const challengeData = [
   {
     id: 1,
-    title: 'Neural Leak',
-    category: 'Web',
+    title: 'Hidden Information',
+    category: 'Forensics',
     difficulty: 'Easy',
     points: 100,
-    description: 'Our neuro-link monitoring system has a suspicious endpoint. Can you find the hidden administrative access?',
-    hint: 'Check the cookies for neural signatures.',
-    flag: 'CYBER{n3ur4l_l34k_f0und}',
+    files:"assets/cat.jpg",
+    description: 'Files can always be changed in a secret way. Can you find the flag?',
+    hint: 'Look at the details of the file',
+    flag: 'CYBER{the_m3tadata_1s_modified}',
     icon: Globe
   },
   {
     id: 2,
-    title: 'Quantum Cipher',
+    title: 'rotation',
     category: 'Crypto',
-    difficulty: 'Medium',
-    points: 250,
-    description: 'An encrypted message was intercepted from the deep network. It seems to use a shifting quantum rotation.',
-    hint: 'The shift is based on the current system version.',
-    flag: 'CYBER{qu4ntum_sh1ft_m4st3r}',
+    difficulty: 'Easy',
+    points: 100,
+    description: 'You will find the flag after decrypting this: UQTWJ{j0lsl1gf_v3ujqhl3v_429sx00x}',
+    hint: 'Sometimes rotation is right',
+    flag: 'CYBER{caesar_d3cr9pt3d_f0212758}',
     icon: Shield
   },
   {
     id: 3,
-    title: 'Buffer Overflow v2',
-    category: 'Pwn',
-    difficulty: 'Hard',
-    points: 500,
-    description: 'The core engine memory management has a flaw. Overwrite the instruction pointer to gain shell access.',
-    hint: 'Look for the "initialize" function buffer size.',
+    title: 'interencdec',
+    category: 'Crypto',
+    difficulty: 'Medium',
+    points: 200,
+    files:"assets/enc_flag.txt",
+    description: 'Can you get the real meaning from this file.',
+    hint: 'Engaging in various decoding processes is of utmost importance',
     flag: 'CYBER{pwn_th3_dung30n_c0r3}',
     icon: Cpu
   },
   {
     id: 4,
-    title: 'Hidden Protocol',
-    category: 'Reverse',
+    title: 'Log Hunt',
+    category: 'General Knowledge',
     difficulty: 'Medium',
-    points: 300,
+    points: 200,
+    files:"assets/logs.txt",
     description: 'A compiled binary was found in the dungeon. Analyze its logic to extract the secret protocol key.',
     hint: 'The key is XORed with 0x42.',
     flag: 'CYBER{r3v3rs3_3ng1n33r1ng_pro}',
@@ -50,23 +53,24 @@ const challengeData = [
   {
     id: 5,
     title: 'Database Breach',
-    category: 'SQLi',
-    difficulty: 'Easy',
-    points: 150,
-    description: 'The user database has a vulnerable search field. Extract the admin flag from the "system_secrets" table.',
-    hint: 'Single quotes are not escaped.',
+    category: 'Web',
+    difficulty: 'Hard',
+    points: 300,
+    description: 'The user database has a vulnerable search field. Extract the flag from the "system_secrets" table.',
+    hint: 'challenge not set yet, to be implemented',
     flag: 'CYBER{sql_1nj3ct10n_succ3ss}',
     icon: Database
   }
 ];
 
-const categories = ['All', 'Web', 'Crypto', 'Pwn', 'Reverse', 'SQLi'];
+const categories = ['All', 'Web', 'Crypto', 'Forensics', 'General Knowledge'];
 
 const ChallengeCard = ({ challenge, onSolve }) => {
   const [isExpanded, setIsExpanded] = useState(false);
   const [inputFlag, setInputFlag] = useState('');
   const [error, setError] = useState('');
   const [solved, setSolved] = useState(false);
+  const [hintVisible, setHintVisible] = useState(false);
 
   const handleSubmit = (e) => {
     e.preventDefault();
@@ -116,10 +120,6 @@ const ChallengeCard = ({ challenge, onSolve }) => {
         </div>
       </div>
 
-      <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: 1.6 }}>
-        {challenge.description}
-      </p>
-
       {!solved ? (
         <>
           <button
@@ -145,12 +145,101 @@ const ChallengeCard = ({ challenge, onSolve }) => {
                 exit={{ height: 0, opacity: 0 }}
                 style={{ overflow: 'hidden' }}
               >
-                <div style={{ paddingTop: '1.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)', marginTop: '1.5rem' }}>
-                  <div style={{ marginBottom: '1.5rem', padding: '1rem', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '0.5rem', borderLeft: '2px solid var(--cyber-pink)' }}>
-                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', fontSize: '0.75rem', color: 'var(--cyber-pink)', fontWeight: 800, marginBottom: '0.5rem' }}>
-                      <Zap size={14} /> HINT DECRYPTED
-                    </span>
-                    <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{challenge.hint}</p>
+                <div style={{ paddingTop: '1.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)', marginTop: '1.5rem', position: 'relative' }}>
+                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: 1.6, paddingRight: '9rem' }}>
+                    {challenge.description}
+                  </p>
+
+                  <button
+                    onClick={() => setHintVisible(!hintVisible)}
+                    style={{
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '0.5rem',
+                      padding: '0.8rem 1.5rem',
+                      background: hintVisible ? 'rgba(255, 105, 180, 0.2)' : 'rgba(255, 105, 180, 0.1)',
+                      border: '1px solid var(--cyber-pink)',
+                      borderRadius: '0.5rem',
+                      color: 'var(--cyber-pink)',
+                      fontFamily: 'var(--font-orbitron)',
+                      fontSize: '0.75rem',
+                      fontWeight: 700,
+                      cursor: 'pointer',
+                      transition: 'all 0.3s ease',
+                      boxShadow: hintVisible ? '0 0 20px rgba(255, 105, 180, 0.4)' : '0 0 10px rgba(255, 105, 180, 0.2)',
+                      position: 'absolute',
+                      top: 0,
+                      right: 0
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.background = 'rgba(255, 105, 180, 0.2)';
+                      e.target.style.boxShadow = '0 0 20px rgba(255, 105, 180, 0.4)';
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.background = hintVisible ? 'rgba(255, 105, 180, 0.2)' : 'rgba(255, 105, 180, 0.1)';
+                      e.target.style.boxShadow = hintVisible ? '0 0 20px rgba(255, 105, 180, 0.4)' : '0 0 10px rgba(255, 105, 180, 0.2)';
+                    }}
+                  >
+                    <Zap size={16} /> HINT {challenge.id}
+                  </button>
+
+                  <AnimatePresence>
+                    {hintVisible && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: 'auto', opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        style={{ 
+                          overflow: 'hidden',
+                          position: 'absolute',
+                          top: '3.5rem',
+                          right: 0,
+                          width: '300px',
+                          zIndex: 10
+                        }}
+                      >
+                        <div style={{ padding: '1rem', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '0.5rem', borderLeft: '2px solid var(--cyber-pink)' }}>
+                          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{challenge.hint}</p>
+                        </div>
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+
+                  <div style={{ marginTop: hintVisible ? '0' : '0' }}>
+                    {challenge.files && (
+                    <a 
+                      href={challenge.files} 
+                      download
+                      style={{
+                        display: 'inline-flex',
+                        alignItems: 'center',
+                        gap: '0.5rem',
+                        padding: '0.8rem 1.5rem',
+                        background: 'rgba(0, 243, 255, 0.1)',
+                        border: '1px solid var(--cyber-cyan)',
+                        borderRadius: '0.5rem',
+                        color: 'var(--cyber-cyan)',
+                        fontFamily: 'var(--font-orbitron)',
+                        fontSize: '0.75rem',
+                        fontWeight: 700,
+                        marginBottom: '1.5rem',
+                        textDecoration: 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease',
+                        boxShadow: '0 0 10px rgba(0, 243, 255, 0.2)'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = 'rgba(0, 243, 255, 0.2)';
+                        e.target.style.boxShadow = '0 0 20px rgba(0, 243, 255, 0.4)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = 'rgba(0, 243, 255, 0.1)';
+                        e.target.style.boxShadow = '0 0 10px rgba(0, 243, 255, 0.2)';
+                      }}
+                    >
+                      <Download size={16} /> DOWNLOAD FILES
+                    </a>
+                    )}
                   </div>
 
                   <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '1rem' }}>
