@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Zap, Terminal, Database, Cpu, Globe, Flag, CheckCircle, ChevronRight, AlertTriangle, Download } from 'lucide-react';
+import { Shield, Terminal, Database, Cpu, Globe, ChevronRight, X, Flag, AlertTriangle } from 'lucide-react';
 
 const challengeData = [
   {
@@ -65,35 +65,26 @@ const challengeData = [
 
 const categories = ['All', 'Web', 'Crypto', 'Forensics', 'General Knowledge'];
 
-const ChallengeCard = ({ challenge, onSolve }) => {
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [inputFlag, setInputFlag] = useState('');
-  const [error, setError] = useState('');
-  const [solved, setSolved] = useState(false);
-  const [hintVisible, setHintVisible] = useState(false);
-
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    if (inputFlag.trim() === challenge.flag.trim()) {
-      setSolved(true);
-      setError('');
-      onSolve(challenge.points);
-    } else {
-      setError('Invalid flag. Neural link rejected.');
-    }
-  };
-
+const ChallengeCard = ({ challenge, onClick }) => {
   return (
     <motion.div
       layout
       className="glass-card"
+      onClick={onClick}
       style={{
         padding: '2rem',
-        borderColor: solved ? 'var(--cyber-cyan)' : 'rgba(255, 255, 255, 0.1)',
-        background: solved ? 'rgba(0, 243, 255, 0.02)' : 'var(--glass-bg)',
+        borderColor: 'rgba(255, 255, 255, 0.1)',
+        background: 'var(--glass-bg)',
         position: 'relative',
-        overflow: 'hidden'
+        overflow: 'hidden',
+        cursor: 'pointer',
+        transition: 'all 0.3s ease'
       }}
+      whileHover={{
+        scale: 1.02,
+        boxShadow: '0 0 30px rgba(0, 243, 255, 0.3)'
+      }}
+      whileTap={{ scale: 0.98 }}
     >
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
         <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
@@ -103,7 +94,7 @@ const ChallengeCard = ({ challenge, onSolve }) => {
             borderRadius: '0.75rem',
             border: '1px solid rgba(255, 255, 255, 0.1)'
           }}>
-            <challenge.icon size={24} color={solved ? 'var(--cyber-cyan)' : 'var(--cyber-purple)'} />
+            <challenge.icon size={24} color='var(--cyber-purple)' />
           </div>
 
           <div>
@@ -120,175 +111,260 @@ const ChallengeCard = ({ challenge, onSolve }) => {
         </div>
       </div>
 
-      {!solved ? (
-        <>
-          <button
-            onClick={() => setIsExpanded(!isExpanded)}
+    </motion.div>
+  );
+};
+
+const ChallengeModal = ({ challenge, isOpen, onClose, onSolve }) => {
+  if (!challenge) return null;
+
+  const [inputFlag, setInputFlag] = useState('');
+  const [error, setError] = useState('');
+  const [showHint, setShowHint] = useState(false);
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    if (inputFlag.trim() === challenge.flag.trim()) {
+      setError('');
+      onSolve(challenge.points);
+      onClose();
+    } else {
+      setError('Invalid flag. Neural link rejected.');
+    }
+  };
+
+  return (
+    <AnimatePresence>
+      {isOpen && (
+        <div style={{
+          position: 'fixed',
+          width: '100%',
+          inset: 0,
+          zIndex: 2000,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          padding: '1rem'
+        }}>
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            onClick={onClose}
             style={{
-              background: 'transparent',
-              color: 'var(--cyber-cyan)',
-              fontSize: '0.8rem',
-              fontFamily: 'var(--font-orbitron)',
-              display: 'flex',
-              alignItems: 'center',
-              gap: '0.5rem'
+              position: 'absolute',
+              inset: 0,
+              background: 'rgba(0, 0, 0, 0.8)',
+              backdropFilter: 'blur(8px)'
+            }}
+          />
+
+          <motion.div
+            initial={{ scale: 0.9, opacity: 0, y: 20 }}
+            animate={{ scale: 1, opacity: 1, y: 0 }}
+            exit={{ scale: 0.9, opacity: 0, y: 20 }}
+            className="glass-card"
+            style={{
+              maxWidth: '900px',
+              width: 'min(95vw, 900px)',
+              position: 'relative',
+              padding: '2rem',
+              display: 'grid',
+              gridTemplateColumns: '1fr 200px',
+              gap: '2rem',
+              alignItems: 'start'
             }}
           >
-            {isExpanded ? 'CLOSE TERMINAL' : 'INITIALIZE CHALLENGE'} <ChevronRight size={16} style={{ transform: isExpanded ? 'rotate(90deg)' : 'none', transition: 'transform 0.3s' }} />
-          </button>
+            <button
+              onClick={onClose}
+              style={{
+                position: 'absolute',
+                top: '1rem',
+                right: '1rem',
+                background: 'transparent',
+                border: 'none',
+                color: 'var(--text-muted)',
+                cursor: 'pointer',
+                padding: '0.5rem',
+                borderRadius: '50%',
+                transition: 'all 0.3s ease',
+                zIndex: 10
+              }}
+              onMouseEnter={(e) => e.target.style.background = 'rgba(255, 255, 255, 0.1)'}
+              onMouseLeave={(e) => e.target.style.background = 'transparent'}
+            >
+              <X size={24} />
+            </button>
 
-          <AnimatePresence>
-            {isExpanded && (
-              <motion.div
-                initial={{ height: 0, opacity: 0 }}
-                animate={{ height: 'auto', opacity: 1 }}
-                exit={{ height: 0, opacity: 0 }}
-                style={{ overflow: 'hidden' }}
-              >
-                <div style={{ paddingTop: '1.5rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)', marginTop: '1.5rem', position: 'relative' }}>
-                  <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem', marginBottom: '1.5rem', lineHeight: 1.6, paddingRight: '9rem' }}>
-                    {challenge.description}
-                  </p>
+            {/* Left Column */}
+            <div>
+              <h2 style={{
+                fontSize: '1.8rem',
+                fontWeight: 800,
+                marginBottom: '1rem',
+                color: 'var(--cyber-cyan)'
+              }}>
+                {challenge.title}
+              </h2>
+              <span style={{
+                    fontSize: '0.8rem',
+                    color: 'var(--text-muted)',
+                    textTransform: 'uppercase',
+                    letterSpacing: '1px'
+                  }}>
+                    {challenge.category} • {challenge.difficulty} • {challenge.points} PTS
+                  </span>
+              <p style={{
+                color: 'var(--text-muted)',
+                fontSize: '1rem',
+                lineHeight: 1.6,
+                marginBottom: '2rem',
+                marginTop: '1rem'
+              }}>
+                {challenge.description}
+              </p>
 
-                  <button
-                    onClick={() => setHintVisible(!hintVisible)}
+              {/* Flag Submission Form */}
+              <form onSubmit={handleSubmit} style={{ marginBottom: '2rem' }}>
+                <div style={{ position: 'relative', marginBottom: '1rem' }}>
+                  <Flag size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--cyber-cyan)' }} />
+                  <input
+                    type="text"
+                    placeholder="CYBER{f14g_h3r3}"
+                    value={inputFlag}
+                    onChange={(e) => setInputFlag(e.target.value)}
                     style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      padding: '0.8rem 1.5rem',
-                      background: hintVisible ? 'rgba(255, 105, 180, 0.2)' : 'rgba(255, 105, 180, 0.1)',
-                      border: '1px solid var(--cyber-pink)',
+                      width: '100%',
+                      padding: '0.8rem 1rem 0.8rem 2.5rem',
+                      background: 'rgba(0, 0, 0, 0.3)',
+                      border: '1px solid rgba(0, 243, 255, 0.2)',
                       borderRadius: '0.5rem',
-                      color: 'var(--cyber-pink)',
+                      color: 'white',
                       fontFamily: 'var(--font-orbitron)',
-                      fontSize: '0.75rem',
-                      fontWeight: 700,
-                      cursor: 'pointer',
-                      transition: 'all 0.3s ease',
-                      boxShadow: hintVisible ? '0 0 20px rgba(255, 105, 180, 0.4)' : '0 0 10px rgba(255, 105, 180, 0.2)',
-                      position: 'absolute',
-                      top: 0,
-                      right: 0
+                      fontSize: '0.9rem'
                     }}
-                    onMouseEnter={(e) => {
-                      e.target.style.background = 'rgba(255, 105, 180, 0.2)';
-                      e.target.style.boxShadow = '0 0 20px rgba(255, 105, 180, 0.4)';
-                    }}
-                    onMouseLeave={(e) => {
-                      e.target.style.background = hintVisible ? 'rgba(255, 105, 180, 0.2)' : 'rgba(255, 105, 180, 0.1)';
-                      e.target.style.boxShadow = hintVisible ? '0 0 20px rgba(255, 105, 180, 0.4)' : '0 0 10px rgba(255, 105, 180, 0.2)';
-                    }}
-                  >
-                    <Zap size={16} /> HINT {challenge.id}
-                  </button>
-
-                  <AnimatePresence>
-                    {hintVisible && (
-                      <motion.div
-                        initial={{ height: 0, opacity: 0 }}
-                        animate={{ height: 'auto', opacity: 1 }}
-                        exit={{ height: 0, opacity: 0 }}
-                        style={{ 
-                          overflow: 'hidden',
-                          position: 'absolute',
-                          top: '3.5rem',
-                          right: 0,
-                          width: '300px',
-                          zIndex: 10
-                        }}
-                      >
-                        <div style={{ padding: '1rem', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '0.5rem', borderLeft: '2px solid var(--cyber-pink)' }}>
-                          <p style={{ fontSize: '0.85rem', color: 'var(--text-muted)' }}>{challenge.hint}</p>
-                        </div>
-                      </motion.div>
-                    )}
-                  </AnimatePresence>
-
-                  <div style={{ marginTop: hintVisible ? '0' : '0' }}>
-                    {challenge.files && (
-                    <a 
-                      href={challenge.files} 
-                      download
-                      style={{
-                        display: 'inline-flex',
-                        alignItems: 'center',
-                        gap: '0.5rem',
-                        padding: '0.8rem 1.5rem',
-                        background: 'rgba(0, 243, 255, 0.1)',
-                        border: '1px solid var(--cyber-cyan)',
-                        borderRadius: '0.5rem',
-                        color: 'var(--cyber-cyan)',
-                        fontFamily: 'var(--font-orbitron)',
-                        fontSize: '0.75rem',
-                        fontWeight: 700,
-                        marginBottom: '1.5rem',
-                        textDecoration: 'none',
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease',
-                        boxShadow: '0 0 10px rgba(0, 243, 255, 0.2)'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.background = 'rgba(0, 243, 255, 0.2)';
-                        e.target.style.boxShadow = '0 0 20px rgba(0, 243, 255, 0.4)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.background = 'rgba(0, 243, 255, 0.1)';
-                        e.target.style.boxShadow = '0 0 10px rgba(0, 243, 255, 0.2)';
-                      }}
-                    >
-                      <Download size={16} /> DOWNLOAD FILES
-                    </a>
-                    )}
-                  </div>
-
-                  <form onSubmit={handleSubmit} style={{ display: 'flex', gap: '1rem' }}>
-                    <div style={{ flex: 1, position: 'relative' }}>
-                      <Flag size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--cyber-cyan)' }} />
-                      <input
-                        type="text"
-                        placeholder="CYBER{f14g_h3r3}"
-                        value={inputFlag}
-                        onChange={(e) => setInputFlag(e.target.value)}
-                        style={{
-                          width: '100%',
-                          padding: '0.8rem 1rem 0.8rem 2.5rem',
-                          background: 'rgba(0, 0, 0, 0.3)',
-                          border: '1px solid rgba(0, 243, 255, 0.2)',
-                          borderRadius: '0.5rem',
-                          color: 'white',
-                          fontFamily: 'var(--font-orbitron)',
-                          fontSize: '0.75rem'
-                        }}
-                      />
-                    </div>
-                    <button className="btn-primary" style={{ padding: '0 1.5rem', fontSize: '0.75rem' }}>SUBMIT</button>
-                  </form>
-                  {error && (
-                    <div style={{ marginTop: '1rem', color: 'var(--cyber-pink)', fontSize: '0.75rem', display: 'flex', alignItems: 'center', gap: '0.4rem' }}>
-                      <AlertTriangle size={14} /> {error}
-                    </div>
-                  )}
+                  />
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </>
-      ) : (
-        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', color: 'var(--cyber-cyan)', fontWeight: 800, fontSize: '0.9rem' }}>
-          <CheckCircle size={20} /> CHALLENGE COMPLETED
+                <button 
+                  type="submit"
+                  className="btn-primary"
+                  style={{ 
+                    width: '100%', 
+                    padding: '0.8rem 1.5rem', 
+                    fontSize: '0.9rem',
+                    fontFamily: 'var(--font-orbitron)',
+                    fontWeight: 700
+                  }}
+                >
+                  SUBMIT FLAG
+                </button>
+              </form>
+
+              {error && (
+                <div style={{ 
+                  marginBottom: '2rem',
+                  color: 'var(--cyber-pink)', 
+                  fontSize: '0.9rem', 
+                  display: 'flex', 
+                  alignItems: 'center', 
+                  gap: '0.4rem',
+                  padding: '0.5rem',
+                  background: 'rgba(255, 105, 180, 0.1)',
+                  borderRadius: '0.5rem',
+                  border: '1px solid rgba(255, 105, 180, 0.2)'
+                }}>
+                  <AlertTriangle size={16} />
+                  {error}
+                </div>
+              )}
+            </div>
+
+            {/* Right Column - Hint */}
+            <div style={{
+              display: 'flex',
+              flexDirection: 'column',
+              gap: '1rem',
+              padding: '1.5rem',
+              background: 'rgba(0, 243, 255, 0.05)',
+              border: '1px solid rgba(0, 243, 255, 0.2)',
+              borderRadius: '0.75rem',
+              height: 'fit-content',
+              position: 'sticky',
+              top: '2rem',
+              alignItems: 'center',
+              justifyContent: 'center',
+              alignSelf: 'center'
+            }}>
+              <button
+                onClick={() => setShowHint(!showHint)}
+                style={{
+                  padding: '0.6rem 0.8rem',
+                  background: showHint ? 'rgba(0, 243, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid ' + (showHint ? 'rgba(0, 243, 255, 0.5)' : 'rgba(255, 255, 255, 0.1)'),
+                  borderRadius: '0.5rem',
+                  color: 'var(--cyber-cyan)',
+                  fontFamily: 'var(--font-orbitron)',
+                  fontSize: '0.7rem',
+                  fontWeight: 700,
+                  cursor: 'pointer',
+                  transition: 'all 0.3s ease',
+                  textTransform: 'uppercase',
+                  letterSpacing: '0.5px',
+                  whiteSpace: 'nowrap'
+                }}
+                onMouseEnter={(e) => !showHint && (e.target.style.background = 'rgba(255, 255, 255, 0.08)')}
+                onMouseLeave={(e) => !showHint && (e.target.style.background = 'rgba(255, 255, 255, 0.05)')}
+              >
+                {showHint ? '✕ Hide Hint' : '? Show Hint'}
+              </button>
+
+              {showHint && (
+                <motion.div
+                  initial={{ opacity: 0, y: -10 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
+                  style={{
+                    padding: '0.75rem',
+                    background: 'rgba(0, 243, 255, 0.08)',
+                    border: '1px solid rgba(0, 243, 255, 0.3)',
+                    borderRadius: '0.5rem',
+                    color: 'var(--text-muted)',
+                    fontSize: '0.75rem',
+                    lineHeight: 1.4,
+                    fontFamily: 'var(--font-body)',
+                    textAlign: 'center'
+                  }}
+                >
+                  {challenge.hint}
+                </motion.div>
+              )}
+            </div>
+
+          </motion.div>
         </div>
       )}
-    </motion.div>
+    </AnimatePresence>
   );
 };
 
 const Challenges = ({ onPointsUpdate }) => {
   const [filter, setFilter] = useState('All');
+  const [selectedChallenge, setSelectedChallenge] = useState(null);
+  const [modalOpen, setModalOpen] = useState(false);
 
   const filteredChallenges = filter === 'All' 
     ? challengeData 
     : challengeData.filter(c => c.category === filter);
+
+  const handleChallengeClick = (challenge) => {
+    setSelectedChallenge(challenge);
+    setModalOpen(true);
+  };
+
+  const handleModalClose = () => {
+    setModalOpen(false);
+    setSelectedChallenge(null);
+  };
 
   return (
     <section id="challenges" style={{ padding: '8rem 0', minHeight: '100vh' }}>
@@ -337,10 +413,17 @@ const Challenges = ({ onPointsUpdate }) => {
             <ChallengeCard 
               key={challenge.id} 
               challenge={challenge} 
-              onSolve={(pts) => onPointsUpdate(pts)}
+              onClick={() => handleChallengeClick(challenge)}
             />
           ))}
         </div>
+
+        <ChallengeModal
+          challenge={selectedChallenge}
+          isOpen={modalOpen}
+          onClose={handleModalClose}
+          onSolve={onPointsUpdate}
+        />
       </div>
     </section>
   );
