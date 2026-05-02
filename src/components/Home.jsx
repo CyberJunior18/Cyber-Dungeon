@@ -1,10 +1,10 @@
 import { motion } from 'framer-motion';
 import { Zap, ChevronRight, Activity } from 'lucide-react';
 
-const Hero = ({ onGetStarted }) => {
+const Home = ({ onGetStarted }) => {
   return (
-    <section id="hero" className="hero-section">
-      <div className="hero-grid"></div>
+    <section id="home" className="home-section">
+      <div className="home-grid"></div>
       
       {/* Dynamic Background Glows */}
       <motion.div 
@@ -27,7 +27,7 @@ const Hero = ({ onGetStarted }) => {
         }}
       ></motion.div>
 
-      <div className="container hero-content">
+      <div className="container home-content">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -54,7 +54,7 @@ const Hero = ({ onGetStarted }) => {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 0.2 }}
-          className="hero-title"
+          className="home-title"
         >
           ENTER THE <br />
           <span className="neon-text-purple animate-glow-pulse" style={{ fontSize: '1.1em' }}>CYBER DUNGEON</span>
@@ -64,7 +64,7 @@ const Hero = ({ onGetStarted }) => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 1, delay: 0.5 }}
-          className="hero-subtitle"
+          className="home-subtitle"
         >
           Experience the ultimate CTF challenge. Decode quantum ciphers, breach 
           neural networks, and ascend the leaderboard in a visually stunning 
@@ -135,4 +135,4 @@ const Hero = ({ onGetStarted }) => {
   );
 };
 
-export default Hero;
+export default Home;

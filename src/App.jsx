@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import Navbar from './components/Navbar';
-import Hero from './components/Home';
+import Home from './components/Home';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
 import Challenges from './components/Challenges';

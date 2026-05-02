@@ -235,8 +235,8 @@ button {
   transform: translateY(-3px);
 }
 
-/* Hero Section */
-.hero-section {
+/* Home Section */
+.home-section {
   min-height: 100vh;
   display: flex;
   align-items: center;
@@ -246,7 +246,7 @@ button {
   padding: 8rem 0 4rem;
 }
 
-.hero-grid {
+.home-grid {
   position: absolute;
   inset: 0;
   background-image: 
@@ -257,23 +257,24 @@ button {
   pointer-events: none;
 }
 
-.hero-content {
+.home-content {
   text-align: center;
   position: relative;
   z-index: 10;
 }
 
-.hero-title {
+.home-title {
   font-size: clamp(3rem, 10vw, 7.5rem);
   font-weight: 950;
   margin-bottom: 2rem;
   line-height: 1;
   background: linear-gradient(to bottom, #fff 60%, #9ca3af);
   -webkit-background-clip: text;
+  background-clip: text;
   -webkit-text-fill-color: transparent;
 }
 
-.hero-subtitle {
+.home-subtitle {
   color: var(--text-muted);
   font-size: clamp(1.1rem, 2vw, 1.4rem);
   max-width: 45rem;
@@ -339,7 +340,7 @@ button {
     display: none;
   }
   
-  .hero-title {
+  .home-title {
     font-size: 4rem;
   }
   
