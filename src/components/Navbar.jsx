@@ -16,8 +16,9 @@ const Navbar = ({ user, points, onAuthClick, onLogout, view, onViewChange }) => 
 
   const navLinks = [
     { name: 'Home', action: () => onViewChange('landing'), active: view === 'landing' },
+    { name: 'Lessons', action: () => onViewChange('lessons'), active: view === 'lessons' },
     { name: 'Challenges', action: () => user ? onViewChange('dashboard') : onAuthClick(), active: view === 'dashboard' },
-    { name: 'Leaderboard', action: () => {}, active: false },
+    { name: 'Leaderboard', action: () => onViewChange('leaderboard'), active: view === 'leaderboard' },
   ];
 
   return (

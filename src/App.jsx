@@ -5,6 +5,8 @@ import Home from './components/Home';
 import Footer from './components/Footer';
 import AuthModal from './components/AuthModal';
 import Challenges from './components/Challenges';
+import Leaderboard from './components/Leaderboard';
+import Lessons from './components/Lessons';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -50,7 +52,7 @@ function App() {
             >
               <Home onGetStarted={() => user ? setView('dashboard') : setIsAuthModalOpen(true)} />
             </motion.div>
-          ) : (
+          ) : view === 'dashboard' ? (
             <motion.div
               key="dashboard"
               initial={{ opacity: 0, y: 20 }}
@@ -59,6 +61,26 @@ function App() {
               transition={{ duration: 0.5 }}
             >
               <Challenges onPointsUpdate={handlePointsUpdate} />
+            </motion.div>
+          ) : view === 'lessons' ? (
+            <motion.div
+              key="lessons"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Lessons />
+            </motion.div>
+          ) : (
+            <motion.div
+              key="leaderboard"
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Leaderboard />
             </motion.div>
           )}
         </AnimatePresence>

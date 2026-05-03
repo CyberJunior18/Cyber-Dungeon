@@ -16,7 +16,7 @@ const Footer = () => {
               </span>
             </div>
             <p style={{ color: 'var(--text-muted)', maxWidth: '24rem', fontSize: '0.95rem', lineHeight: 1.6 }}>
-              Forging the future of neural connectivity. Join us in the digital frontier and redefine what's possible in the cyber realm.
+              This is your place to start hacking, try challenges, make mistakes, and learn how things really work step by step as you grow your skills in cybersecurity.
             </p>
           </div>
 

@@ -66,9 +66,9 @@ const Home = ({ onGetStarted }) => {
           transition={{ duration: 1, delay: 0.5 }}
           className="home-subtitle"
         >
-          Experience the ultimate CTF challenge. Decode quantum ciphers, breach 
-          neural networks, and ascend the leaderboard in a visually stunning 
-          cyberpunk arena.
+          Your friendly gateway to the world of cyber security. 
+          Learn, practice, and master CTF challenges in a safe, 
+          hands-on environment designed for learning and growth.
         </motion.p>
 
         <motion.div
@@ -85,7 +85,7 @@ const Home = ({ onGetStarted }) => {
             GET ACCESS <ChevronRight size={22} />
           </button>
           <button className="btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
-            <Zap size={22} /> VIEW MODULES
+            <Zap size={22} /> START LEARNING
           </button>
         </motion.div>
       </div>
