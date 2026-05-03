@@ -94,7 +94,7 @@ const Leaderboard = () => {
             <Trophy size={60} color="#bc13fe" style={{ margin: '0 auto 1.5rem', filter: 'drop-shadow(0 0 10px #bc13fe)' }} />
             <div style={{ fontWeight: 900, fontSize: '1.3rem', marginBottom: '0.5rem' }}>{mockLeaderboard[0].username}</div>
             <div className="neon-text-purple" style={{ fontWeight: 950, fontSize: '1.2rem' }}>{mockLeaderboard[0].points} PTS</div>
-            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem', letterSpacing: '2px' }}>THE ARCHITECT</div>
+            <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginTop: '0.5rem', letterSpacing: '2px' }}>Rank 1</div>
           </motion.div>
 
           {/* Rank 3 */}

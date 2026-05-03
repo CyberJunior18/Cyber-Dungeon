@@ -52,7 +52,10 @@ function App() {
               exit={{ opacity: 0 }}
               transition={{ duration: 0.5 }}
             >
-              <Home onGetStarted={() => user ? setView('dashboard') : setIsAuthModalOpen(true)} />
+              <Home 
+                onGetStarted={() => user ? setView('dashboard') : setIsAuthModalOpen(true)} 
+                onViewChange={setView}
+              />
             </motion.div>
           ) : view === 'dashboard' ? (
             <motion.div

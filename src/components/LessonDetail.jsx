@@ -1,6 +1,6 @@
-import { motion } from 'framer-motion';
-import { ChevronLeft, ChevronRight, BookOpen, Video, FileText, Code, CheckCircle, AlertCircle } from 'lucide-react';
-import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { ChevronLeft, ChevronRight, BookOpen, Video, FileText, Code, CheckCircle, AlertCircle, Zap } from 'lucide-react';
+import { useState, useEffect } from 'react';
 
 const lessonData = [
   {
@@ -23,7 +23,9 @@ const lessonData = [
     description: 'Understand how web applications work and how to identify common vulnerabilities like SQL Injection.',
     icon: Code,
     color: 'var(--cyber-purple)',
-    parts: ["Web exploitation basics involve finding and exploiting vulnerabilities in web applications to gain unauthorized access, steal sensitive data, or take control of web servers. These vulnerabilities often arise from improper validation of user input or insecure server configurations.", "Core Web Exploitation Concepts\n\nHTTP Requests & Responses: Understanding how browsers communicate with servers (GET, POST, headers, cookies) is fundamental, as attackers often modify these requests.\n\nUser Input Validation: Most attacks occur because applications trust user input too much. Attackers submit malicious data to trigger bugs.\n\nReconnaissance: Gathering information about a target (e.g., identifying server types, finding hidden files/directories) using tools like DirBuster.\n\nStatelessness: HTTP is stateless, meaning servers use sessions and cookies to track users. Exploiting these mechanisms can lead to session hijacking.", "Top Web Vulnerabilities\n\nSQL Injection (SQLi): Inserting malicious SQL commands into input fields (e.g., login forms) to manipulate the backend database, extract data, or bypass authentication.\n\nCross-Site Scripting (XSS): Injecting malicious JavaScript into a web page that executes in the browser of another user. It is used to steal session cookies or deface websites.\n\nCommand Injection: Executing unauthorized operating system commands on the server by inputting system commands into application forms.\n\nBroken Access Control (IDOR): Insecure Direct Object References occur when an app exposes references to internal objects (e.g., files, database keys), allowing users to access data they should not, such as other users' profiles.\n\nDirectory/File Traversal: Manipulating file paths (e.g., ../../etc/passwd) to access sensitive files outside the intended web directory.\n\nFile Upload Vulnerabilities: Uploading malicious scripts (like a PHP web shell) disguised as legitimate files (e.g., images) to gain remote code execution on the server.\n\nServer-Side Request Forgery (SSRF): Tricking the server into making HTTP requests to internal, protected systems."]
+    parts: ["Web exploitation basics involve finding and exploiting vulnerabilities in web applications to gain unauthorized access, steal sensitive data, or take control of web servers. These vulnerabilities often arise from improper validation of user input or insecure server configurations.", "Core Web Exploitation Concepts\n\nHTTP Requests & Responses: Understanding how browsers communicate with servers (GET, POST, headers, cookies) is fundamental, as attackers often modify these requests.\n\nUser Input Validation: Most attacks occur because applications trust user input too much. Attackers submit malicious data to trigger bugs.\n\nReconnaissance: Gathering information about a target (e.g., identifying server types, finding hidden files/directories) using tools like DirBuster.\n\nStatelessness: HTTP is stateless, meaning servers use sessions and cookies to track users. Exploiting these mechanisms can lead to session hijacking.", "Top Web Vulnerabilities\n\nSQL Injection (SQLi): Inserting malicious SQL commands into input fields (e.g., login forms) to manipulate the backend database, extract data, or bypass authentication.\n\nCross-Site Scripting (XSS): Injecting malicious JavaScript into a web page that executes in the browser of another user. It is used to steal session cookies or deface websites.\n\nCommand Injection: Executing unauthorized operating system commands on the server by inputting system commands into application forms.\n\nBroken Access Control (IDOR): Insecure Direct Object References occur when an app exposes references to internal objects (e.g., files, database keys), allowing users to access data they should not, such as other users' profiles.\n\nDirectory/File Traversal: Manipulating file paths (e.g., ../../etc/passwd) to access sensitive files outside the intended web directory.\n\nFile Upload Vulnerabilities: Uploading malicious scripts (like a PHP web shell) disguised as legitimate files (e.g., images) to gain remote code execution on the server."],
+    challenges: "Breach the local administrative node. Flag hidden in system logs.",
+    flag: "CYBER{w3b_3xpl01t_m4st3r}"
   },
   {
     id: 3,
@@ -52,11 +54,20 @@ const lessonData = [
 
 const LessonDetail = ({ lessonTitle, onBack }) => {
   const lesson = lessonData.find(l => l.title === lessonTitle);
-  const [currentPage, setCurrentPage] = useState(0); // 0 = overview, 1+ = parts, final = challenge
+  const [currentPage, setCurrentPage] = useState(0); 
   const [flagInput, setFlagInput] = useState('');
-  const [flagStatus, setFlagStatus] = useState(null); // null, 'correct', 'incorrect'
+  const [flagStatus, setFlagStatus] = useState(null); 
   const [showFlagMessage, setShowFlagMessage] = useState(false);
   const [isLessonComplete, setIsLessonComplete] = useState(false);
+
+  // Reset state when lesson changes
+  useEffect(() => {
+    setCurrentPage(0);
+    setFlagInput('');
+    setFlagStatus(null);
+    setShowFlagMessage(false);
+    setIsLessonComplete(false);
+  }, [lessonTitle]);
 
   if (!lesson) {
     return (
@@ -70,7 +81,7 @@ const LessonDetail = ({ lessonTitle, onBack }) => {
 
   const IconComponent = lesson.icon;
   const hasChallenge = lesson.challenges && lesson.flag;
-  const totalPages = (lesson.parts?.length || 0) + 1 + (hasChallenge ? 1 : 0); // overview + parts + challenge (if exists)
+  const totalPages = (lesson.parts?.length || 0) + 1 + (hasChallenge ? 1 : 0); 
   const isOnChallengePage = hasChallenge && currentPage === (lesson.parts?.length || 0) + 1;
 
   const handleFlagSubmit = () => {
@@ -87,19 +98,18 @@ const LessonDetail = ({ lessonTitle, onBack }) => {
   };
 
   const handleNextPage = () => {
-    if (currentPage === totalPages - 1) {
-      return; // Don't advance on last page
-    }
-    // If on challenge page and challenge not completed, don't allow next
-    if (isOnChallengePage && flagStatus !== 'correct') {
-      return;
-    }
     if (currentPage < totalPages - 1) {
-      setCurrentPage(currentPage + 1);
-      setFlagInput('');
-      setFlagStatus(null);
-      // Mark complete when reaching last page (if no challenge)
-      if (currentPage + 1 === totalPages - 1 && !isOnChallengePage) {
+      if (isOnChallengePage && flagStatus !== 'correct') return;
+      
+      setCurrentPage(prev => prev + 1);
+      // Reset flag message/status when navigating away from challenge
+      if (isOnChallengePage) {
+        setFlagInput('');
+        setFlagStatus(null);
+      }
+      
+      // Mark complete if no challenge and reached end
+      if (!hasChallenge && currentPage + 1 === totalPages - 1) {
         setIsLessonComplete(true);
       }
     }
@@ -107,9 +117,7 @@ const LessonDetail = ({ lessonTitle, onBack }) => {
 
   const handlePrevPage = () => {
     if (currentPage > 0) {
-      setCurrentPage(currentPage - 1);
-      setFlagInput('');
-      setFlagStatus(null);
+      setCurrentPage(prev => prev - 1);
     }
   };
 
@@ -144,13 +152,14 @@ const LessonDetail = ({ lessonTitle, onBack }) => {
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
           transition={{ duration: 0.5 }}
-          key={currentPage}
+          key={`${lesson.id}-${currentPage}`}
         >
           <div style={{
             display: 'flex',
             alignItems: 'flex-start',
             gap: '2rem',
-            marginBottom: '3rem'
+            marginBottom: '3rem',
+            flexWrap: 'wrap'
           }}>
             <div style={{
               width: '5rem',
@@ -161,307 +170,261 @@ const LessonDetail = ({ lessonTitle, onBack }) => {
               alignItems: 'center',
               justifyContent: 'center',
               border: `2px solid ${lesson.color}33`,
-              flexShrink: 0
+              flexShrink: 0,
+              boxShadow: `0 0 20px ${lesson.color}11`
             }}>
               <IconComponent size={32} color={lesson.color} />
             </div>
 
-            <div style={{ flex: 1 }}>
-              <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 950, marginBottom: '1rem' }}>
+            <div style={{ flex: 1, minWidth: '300px' }}>
+              <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 950, marginBottom: '1rem', lineHeight: 1.1 }}>
                 {lesson.title}
               </h1>
-              <p style={{
-                fontSize: '1.1rem',
-                color: 'var(--text-muted)',
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                marginBottom: '1rem'
-              }}>
-                {lesson.category} • {lesson.duration}
-              </p>
-              <p style={{
-                fontSize: '0.9rem',
-                color: 'var(--cyber-cyan)',
-                textTransform: 'uppercase',
-                letterSpacing: '1px'
-              }}>
-                {currentPage === 0 ? 'Overview' : isOnChallengePage ? 'Challenge' : `Part ${currentPage} of ${lesson.parts?.length || 0}`}
-              </p>
+              <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
+                <p style={{
+                  fontSize: '0.9rem',
+                  color: 'var(--text-muted)',
+                  textTransform: 'uppercase',
+                  letterSpacing: '2px',
+                  fontWeight: 700
+                }}>
+                  {lesson.category} • {lesson.duration}
+                </p>
+                <div style={{ 
+                  padding: '0.4rem 1rem', 
+                  borderRadius: '2rem', 
+                  background: 'rgba(0, 243, 255, 0.05)',
+                  border: '1px solid rgba(0, 243, 255, 0.2)',
+                  fontSize: '0.75rem',
+                  color: 'var(--cyber-cyan)',
+                  textTransform: 'uppercase',
+                  fontWeight: 800,
+                  letterSpacing: '1px'
+                }}>
+                  {currentPage === 0 ? 'Overview' : isOnChallengePage ? 'Challenge' : `Module ${currentPage} / ${lesson.parts?.length || 0}`}
+                </div>
+              </div>
             </div>
           </div>
 
-          {currentPage === 0 ? (
-            // Overview page
-            <>
-              <div style={{
-                background: 'rgba(0, 243, 255, 0.05)',
-                border: '1px solid rgba(0, 243, 255, 0.2)',
-                borderRadius: '1rem',
-                padding: '2.5rem',
-                marginBottom: '3rem'
-              }}>
-                <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1.5rem', color: lesson.color }}>
-                  Overview
+          <div className="glass-card" style={{ padding: '3rem', marginBottom: '3rem', minHeight: '300px' }}>
+            {currentPage === 0 ? (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <h2 style={{ fontSize: '1.75rem', fontWeight: 900, marginBottom: '2rem', color: lesson.color }}>
+                  COURSE OBJECTIVE
                 </h2>
-                <p style={{
-                  fontSize: '1.1rem',
-                  lineHeight: 1.8,
-                  color: 'var(--text-muted)'
-                }}>
+                <p style={{ fontSize: '1.15rem', lineHeight: 1.8, color: 'var(--text-main)' }}>
                   {lesson.description}
                 </p>
-              </div>
-
-              {lesson.parts && lesson.parts.length > 0 && (
-                <div style={{
-                  background: 'rgba(147, 51, 234, 0.05)',
-                  border: '1px solid rgba(147, 51, 234, 0.2)',
-                  borderRadius: '1rem',
-                  padding: '2.5rem',
-                  marginBottom: '3rem'
-                }}>
-                  <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--cyber-purple)' }}>
-                    What You Will Learn
+                
+                {lesson.parts && (
+                  <div style={{ marginTop: '3rem', paddingTop: '3rem', borderTop: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                    <h3 style={{ fontSize: '1.1rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--text-muted)', textTransform: 'uppercase' }}>
+                      Learning Path
+                    </h3>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))', gap: '1.5rem' }}>
+                      {lesson.parts.map((_, idx) => (
+                        <div key={idx} style={{ padding: '1.25rem', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '0.75rem', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                          <span style={{ fontSize: '0.7rem', color: 'var(--cyber-cyan)', fontWeight: 800 }}>MODULE 0{idx + 1}</span>
+                          <p style={{ fontSize: '0.9rem', marginTop: '0.5rem', color: 'var(--text-muted)' }}>Foundational Concepts</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            ) : isOnChallengePage ? (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '1rem', marginBottom: '2rem' }}>
+                  <Zap size={24} className="neon-text-purple" />
+                  <h2 style={{ fontSize: '1.75rem', fontWeight: 900, color: 'var(--cyber-purple)' }}>
+                    FINAL CHALLENGE
                   </h2>
-                  <ul style={{
-                    fontSize: '1.1rem',
-                    lineHeight: 1.8,
-                    color: 'var(--text-muted)',
-                    paddingLeft: '2rem'
-                  }}>
-                    {lesson.parts.map((part, idx) => (
-                      <li key={idx} style={{ marginBottom: '0.5rem' }}>
-                        • {part.substring(0, 100)}...
-                      </li>
-                    ))}
-                  </ul>
                 </div>
-              )}
-            </>
-          ) : isOnChallengePage ? (
-            // Challenge page
-            <div style={{
-              background: 'rgba(255, 100, 0, 0.05)',
-              border: '1px solid rgba(255, 100, 0, 0.2)',
-              borderRadius: '1rem',
-              padding: '2.5rem'
-            }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: 800, marginBottom: '1.5rem', color: 'var(--cyber-orange, #FF6400)' }}>
-                Challenge
-              </h2>
-              <p style={{
-                fontSize: '1.1rem',
-                lineHeight: 1.8,
-                color: 'var(--text-muted)',
-                marginBottom: '2rem'
-              }}>
-                {lesson.challenges}
-              </p>
-
-              <div style={{ marginBottom: '2rem' }}>
-                <label style={{
-                  display: 'block',
-                  fontSize: '0.9rem',
-                  color: 'var(--cyber-cyan)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px',
-                  marginBottom: '0.5rem',
-                  fontWeight: 700
+                
+                <div style={{ 
+                  background: 'rgba(188, 19, 254, 0.03)', 
+                  padding: '2rem', 
+                  borderRadius: '1rem', 
+                  border: '1px solid rgba(188, 19, 254, 0.1)',
+                  marginBottom: '2.5rem' 
                 }}>
-                  Submit Flag
-                </label>
-                <input
-                  type="text"
-                  value={flagInput}
-                  onChange={(e) => setFlagInput(e.target.value)}
-                  onKeyPress={(e) => e.key === 'Enter' && handleFlagSubmit()}
-                  placeholder="CYBER{...}"
-                  style={{
-                    width: '100%',
-                    padding: '1rem',
-                    background: 'rgba(0, 243, 255, 0.1)',
-                    border: `1px solid ${flagStatus === 'correct' ? '#00FF00' : flagStatus === 'incorrect' ? '#FF0000' : 'rgba(0, 243, 255, 0.3)'}`,
-                    borderRadius: '0.5rem',
-                    color: 'white',
-                    fontSize: '1rem',
-                    fontFamily: 'monospace',
-                    outline: 'none',
-                    boxSizing: 'border-box',
-                    transition: 'border-color 0.3s'
-                  }}
-                />
-              </div>
+                  <p style={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'white' }}>
+                    {lesson.challenges}
+                  </p>
+                </div>
 
-              {showFlagMessage && (
-                <motion.div
-                  initial={{ opacity: 0, y: -10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '0.75rem',
-                    padding: '1rem',
-                    marginBottom: '2rem',
-                    borderRadius: '0.5rem',
-                    background: flagStatus === 'correct' ? 'rgba(0, 255, 0, 0.1)' : 'rgba(255, 0, 0, 0.1)',
-                    border: `1px solid ${flagStatus === 'correct' ? '#00FF00' : '#FF0000'}`
-                  }}
-                >
-                  {flagStatus === 'correct' ? (
-                    <>
-                      <CheckCircle size={20} color="#00FF00" />
-                      <span style={{ color: '#00FF00', fontWeight: 700 }}>Correct! Flag accepted!</span>
-                    </>
-                  ) : (
-                    <>
-                      <AlertCircle size={20} color="#FF0000" />
-                      <span style={{ color: '#FF0000', fontWeight: 700 }}>Incorrect flag. Try again!</span>
-                    </>
-                  )}
-                </motion.div>
-              )}
+                <div style={{ maxWidth: '600px' }}>
+                  <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '2px' }}>
+                    ENTER DECRYPTED FLAG
+                  </label>
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <input
+                      type="text"
+                      value={flagInput}
+                      onChange={(e) => setFlagInput(e.target.value)}
+                      onKeyPress={(e) => e.key === 'Enter' && handleFlagSubmit()}
+                      placeholder="CYBER{...}"
+                      disabled={isLessonComplete}
+                      style={{
+                        flex: 1,
+                        padding: '1.25rem',
+                        background: 'rgba(0, 0, 0, 0.3)',
+                        border: '1px solid rgba(255, 255, 255, 0.1)',
+                        borderRadius: '0.75rem',
+                        color: 'white',
+                        fontFamily: 'monospace',
+                        fontSize: '1rem',
+                        outline: 'none',
+                        transition: 'all 0.3s'
+                      }}
+                    />
+                    {!isLessonComplete && (
+                      <button 
+                        onClick={handleFlagSubmit}
+                        className="btn-primary"
+                        style={{ padding: '0 2rem' }}
+                      >
+                        SUBMIT
+                      </button>
+                    )}
+                  </div>
+                  
+                  <AnimatePresence>
+                    {showFlagMessage && (
+                      <motion.div
+                        initial={{ opacity: 0, y: 10 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        exit={{ opacity: 0 }}
+                        style={{
+                          marginTop: '1.5rem',
+                          padding: '1rem',
+                          borderRadius: '0.5rem',
+                          background: flagStatus === 'correct' ? 'rgba(0, 255, 0, 0.05)' : 'rgba(255, 0, 0, 0.05)',
+                          border: `1px solid ${flagStatus === 'correct' ? '#00FF0033' : '#FF000033'}`,
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: '0.75rem',
+                          color: flagStatus === 'correct' ? '#00FF00' : '#FF0000',
+                          fontWeight: 700,
+                          fontSize: '0.9rem'
+                        }}
+                      >
+                        {flagStatus === 'correct' ? <CheckCircle size={18} /> : <AlertCircle size={18} />}
+                        {flagStatus === 'correct' ? 'AUTHENTICATION SUCCESSFUL' : 'ACCESS DENIED: INVALID FLAG'}
+                      </motion.div>
+                    )}
+                  </AnimatePresence>
+                </div>
+              </motion.div>
+            ) : (
+              <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
+                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '2.5rem', color: 'var(--cyber-cyan)', letterSpacing: '2px' }}>
+                  MODULE 0{currentPage}
+                </h2>
+                <div style={{ 
+                  fontSize: '1.1rem', 
+                  lineHeight: 1.9, 
+                  color: 'var(--text-main)', 
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word',
+                  maxWidth: '100%'
+                }}>
+                  {lesson.parts[currentPage - 1]}
+                </div>
+              </motion.div>
+            )}
+          </div>
 
-              <button
-                onClick={handleFlagSubmit}
+          <AnimatePresence>
+            {isLessonComplete && (
+              <motion.div
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
                 style={{
-                  padding: '1rem 2rem',
-                  background: 'linear-gradient(135deg, var(--cyber-cyan), var(--cyber-purple))',
-                  border: 'none',
-                  borderRadius: '0.5rem',
-                  color: 'white',
-                  fontSize: '0.9rem',
-                  fontWeight: 700,
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px',
-                  cursor: 'pointer',
-                  transition: 'transform 0.2s',
-                  marginBottom: '1.5rem'
+                  background: 'linear-gradient(135deg, rgba(0, 255, 0, 0.05), rgba(0, 243, 255, 0.05))',
+                  border: '1px solid #00FF0044',
+                  borderRadius: '1.25rem',
+                  padding: '2.5rem',
+                  textAlign: 'center',
+                  marginBottom: '3rem',
+                  boxShadow: '0 0 30px rgba(0, 255, 0, 0.05)'
                 }}
-                onMouseEnter={(e) => e.target.style.transform = 'scale(1.05)'}
-                onMouseLeave={(e) => e.target.style.transform = 'scale(1)'}
               >
-                Submit Flag
-              </button>
-
-              {!isLessonComplete && (
-                <p style={{
-                  fontSize: '0.85rem',
-                  color: 'var(--cyber-cyan)',
-                  textTransform: 'uppercase',
-                  letterSpacing: '1px',
-                  fontWeight: 600,
-                  textAlign: 'center'
-                }}>
-                  ⓘ Submit the correct flag to complete this lesson
+                <div style={{ width: '4rem', height: '4rem', background: 'rgba(0, 255, 0, 0.1)', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 1.5rem' }}>
+                  <CheckCircle size={32} color="#00FF00" />
+                </div>
+                <h3 style={{ fontSize: '1.75rem', fontWeight: 950, color: '#00FF00', marginBottom: '0.75rem', letterSpacing: '2px' }}>
+                  PROTOCOL COMPLETE
+                </h3>
+                <p style={{ fontSize: '1.1rem', color: 'var(--text-muted)' }}>
+                  You have successfully mastered this learning module. Return to the hub to continue your training.
                 </p>
-              )}
-            </div>
-          ) : (
-            // Parts pages
-            <div style={{
-              background: 'rgba(147, 51, 234, 0.05)',
-              border: '1px solid rgba(147, 51, 234, 0.2)',
-              borderRadius: '1rem',
-              padding: '2.5rem'
-            }}>
-              <p style={{
-                fontSize: '1.1rem',
-                lineHeight: 1.8,
-                color: 'var(--text-muted)',
-                whiteSpace: 'pre-wrap',
-                wordBreak: 'break-word'
-              }}>
-                {lesson.parts[currentPage - 1]}
-              </p>
-            </div>
-          )}
+                <button 
+                  onClick={onBack}
+                  className="btn-outline"
+                  style={{ marginTop: '2rem', borderColor: '#00FF0033', color: '#00FF00' }}
+                >
+                  RETURN TO HUB
+                </button>
+              </motion.div>
+            )}
+          </AnimatePresence>
 
-          {isLessonComplete && (
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9 }}
-              animate={{ opacity: 1, scale: 1 }}
-              style={{
-                background: 'linear-gradient(135deg, rgba(0, 255, 0, 0.1), rgba(0, 243, 255, 0.1))',
-                border: '2px solid #00FF00',
-                borderRadius: '1rem',
-                padding: '2rem',
-                textAlign: 'center',
-                marginBottom: '2rem',
-                marginTop: '2rem'
-              }}
-            >
-              <h3 style={{ fontSize: '1.5rem', fontWeight: 900, color: '#00FF00', marginBottom: '0.5rem' }}>
-                ✓ LESSON COMPLETE!
-              </h3>
-              <p style={{ fontSize: '1rem', color: 'var(--text-muted)' }}>
-                You have successfully completed this lesson.
-              </p>
-            </motion.div>
-          )}
-
-          {/* Navigation buttons */}
           <div style={{
             display: 'flex',
             justifyContent: 'space-between',
             alignItems: 'center',
-            marginTop: '3rem',
+            marginTop: '2rem',
             paddingTop: '2rem',
-            borderTop: '1px solid rgba(255, 255, 255, 0.1)'
+            borderTop: '1px solid rgba(255, 255, 255, 0.05)'
           }}>
             <button
               onClick={handlePrevPage}
               disabled={currentPage === 0}
+              className="btn-outline"
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
+                gap: '0.75rem',
+                opacity: currentPage === 0 ? 0.3 : 1,
                 padding: '0.75rem 1.5rem',
-                background: currentPage === 0 ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
-                border: `1px solid ${currentPage === 0 ? 'rgba(255, 255, 255, 0.1)' : 'var(--cyber-cyan)'}`,
-                borderRadius: '0.5rem',
-                color: currentPage === 0 ? 'var(--text-muted)' : 'var(--cyber-cyan)',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                cursor: currentPage === 0 ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s'
+                fontSize: '0.8rem'
               }}
             >
-              <ChevronLeft size={18} /> Previous
+              <ChevronLeft size={18} /> PREVIOUS
             </button>
 
-            <span style={{
-              fontSize: '0.9rem',
-              color: 'var(--text-muted)',
-              textTransform: 'uppercase',
-              letterSpacing: '1px'
-            }}>
-              {currentPage + 1} / {totalPages}
-            </span>
+            <div style={{ display: 'flex', gap: '0.5rem' }}>
+              {Array.from({ length: totalPages }).map((_, i) => (
+                <div 
+                  key={i}
+                  style={{
+                    width: '8px',
+                    height: '8px',
+                    borderRadius: '50%',
+                    background: i === currentPage ? 'var(--cyber-cyan)' : 'rgba(255, 255, 255, 0.1)',
+                    boxShadow: i === currentPage ? 'var(--neon-cyan-shadow)' : 'none',
+                    transition: 'all 0.3s'
+                  }}
+                />
+              ))}
+            </div>
 
             <button
               onClick={handleNextPage}
-              disabled={currentPage === totalPages - 1 || (isOnChallengePage && flagStatus !== 'correct')}
+              disabled={currentPage === totalPages - 1 || (isOnChallengePage && !isLessonComplete)}
+              className="btn-outline"
               style={{
                 display: 'flex',
                 alignItems: 'center',
-                gap: '0.5rem',
+                gap: '0.75rem',
+                opacity: (currentPage === totalPages - 1 || (isOnChallengePage && !isLessonComplete)) ? 0.3 : 1,
                 padding: '0.75rem 1.5rem',
-                background: (currentPage === totalPages - 1 || (isOnChallengePage && flagStatus !== 'correct')) ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
-                border: `1px solid ${(currentPage === totalPages - 1 || (isOnChallengePage && flagStatus !== 'correct')) ? 'rgba(255, 255, 255, 0.1)' : 'var(--cyber-cyan)'}`,
-                borderRadius: '0.5rem',
-                color: (currentPage === totalPages - 1 || (isOnChallengePage && flagStatus !== 'correct')) ? 'var(--text-muted)' : 'var(--cyber-cyan)',
-                fontSize: '0.85rem',
-                fontWeight: 700,
-                textTransform: 'uppercase',
-                letterSpacing: '1px',
-                cursor: (currentPage === totalPages - 1 || (isOnChallengePage && flagStatus !== 'correct')) ? 'not-allowed' : 'pointer',
-                transition: 'all 0.2s'
+                fontSize: '0.8rem'
               }}
             >
-              Next <ChevronRight size={18} />
+              NEXT <ChevronRight size={18} />
             </button>
           </div>
         </motion.div>

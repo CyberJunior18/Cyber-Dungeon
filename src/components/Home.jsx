@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { Zap, ChevronRight, Activity } from 'lucide-react';
 
-const Home = ({ onGetStarted }) => {
+const Home = ({ onGetStarted, onViewChange }) => {
   return (
     <section id="home" className="home-section">
       <div className="home-grid"></div>
@@ -84,7 +84,7 @@ const Home = ({ onGetStarted }) => {
           >
             GET ACCESS <ChevronRight size={22} />
           </button>
-          <button className="btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+          <button className="btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} onClick={() => onViewChange('lessons')}>
             <Zap size={22} /> START LEARNING
           </button>
         </motion.div>
