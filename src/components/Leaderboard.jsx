@@ -1,20 +1,36 @@
-import { motion } from 'framer-motion';
-import { Trophy, Medal, Target, Zap, User } from 'lucide-react';
+import { useState } from 'react';
+import { motion, AnimatePresence } from 'framer-motion';
+import { Trophy, Medal, Target, User, ChevronLeft, ChevronRight } from 'lucide-react';
 
-const mockLeaderboard = [
-  { rank: 1, username: 'ZeroDay_Master', points: 2450, solved: 12 },
-  { rank: 2, username: 'Ghost_Protocol', points: 2100, solved: 10 },
-  { rank: 3, username: 'Neural_Breaker', points: 1950, solved: 9 },
-  { rank: 4, username: 'Cyber_Phantom', points: 1800, solved: 8 },
-  { rank: 5, username: 'Root_Access', points: 1650, solved: 7 },
-  { rank: 6, username: 'Void_Walker', points: 1400, solved: 6 },
-  { rank: 7, username: 'Static_Void', points: 1250, solved: 5 },
-  { rank: 8, username: 'Bit_Crusher', points: 1100, solved: 5 },
-  { rank: 9, username: 'Neon_Specter', points: 950, solved: 4 },
-  { rank: 10, username: 'Kernel_Panic', points: 800, solved: 3 },
-];
+const mockLeaderboard = Array.from({ length: 30 }, (_, i) => ({
+  rank: i + 1,
+  username: [
+    'ZeroDay_Master', 'Ghost_Protocol', 'Neural_Breaker', 'Cyber_Phantom', 'Root_Access',
+    'Void_Walker', 'Static_Void', 'Bit_Crusher', 'Neon_Specter', 'Kernel_Panic',
+    'Buffer_Wizard', 'Logic_Bomb', 'Crypto_Knight', 'Data_Wraith', 'Shell_Jumper',
+    'Byte_Me', 'Packet_Sniper', 'Admin_Hunter', 'Code_Reaper', 'System_Ghost',
+    'Nexus_Hacker', 'Void_Explorer', 'Pixel_Breaker', 'Quantum_Leap', 'Shadow_Step',
+    'Binary_Soul', 'Circuit_Bender', 'Flow_Master', 'Matrix_Architect', 'Infinity_Loop'
+  ][i],
+  points: 2450 - (i * 75) + Math.floor(Math.random() * 20),
+  solved: Math.max(1, 12 - Math.floor(i / 2.5))
+}));
 
 const Leaderboard = () => {
+  const [currentPage, setCurrentPage] = useState(1);
+  const rowsPerPage = 10;
+  const totalPages = Math.ceil(mockLeaderboard.length / rowsPerPage);
+
+  const indexOfLastRow = currentPage * rowsPerPage;
+  const indexOfFirstRow = indexOfLastRow - rowsPerPage;
+  const currentRows = mockLeaderboard.slice(indexOfFirstRow, indexOfLastRow);
+
+  const paginate = (pageNumber) => {
+    if (pageNumber >= 1 && pageNumber <= totalPages) {
+      setCurrentPage(pageNumber);
+    }
+  };
+
   return (
     <section id="leaderboard" style={{ padding: '8rem 0', minHeight: '100vh' }}>
       <div className="container">
@@ -41,7 +57,7 @@ const Leaderboard = () => {
           </motion.div>
         </div>
 
-        {/* Top 3 Podium */}
+        {/* Top 3 Podium (Always visible as reference) */}
         <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'flex-end', gap: '2rem', marginBottom: '6rem', flexWrap: 'wrap' }}>
           {/* Rank 2 */}
           <motion.div
@@ -96,56 +112,144 @@ const Leaderboard = () => {
           </motion.div>
         </div>
 
-        {/* List View */}
-        <div className="glass-card" style={{ padding: '1rem', background: 'rgba(5, 5, 5, 0.5)', overflowX: 'auto' }}>
-          <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
-            <thead>
-              <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
-                <th style={{ padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontFamily: 'var(--font-orbitron)' }}>RANK</th>
-                <th style={{ padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontFamily: 'var(--font-orbitron)' }}>USER</th>
-                <th style={{ padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontFamily: 'var(--font-orbitron)' }}>SOLVED</th>
-                <th style={{ padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontFamily: 'var(--font-orbitron)', textAlign: 'right' }}>POINTS</th>
-              </tr>
-            </thead>
-            <tbody>
-              {mockLeaderboard.map((user, index) => (
-                <motion.tr
-                  key={user.rank}
-                  initial={{ opacity: 0, x: -10 }}
-                  whileInView={{ opacity: 1, x: 0 }}
-                  transition={{ delay: index * 0.05 }}
-                  viewport={{ once: true }}
-                  style={{ 
-                    borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
-                    background: index % 2 === 0 ? 'rgba(255, 255, 255, 0.01)' : 'transparent'
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(188, 19, 254, 0.05)'}
-                  onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? 'rgba(255, 255, 255, 0.01)' : 'transparent'}
-                >
-                  <td style={{ padding: '1.25rem', fontWeight: 800, color: index < 3 ? 'var(--cyber-cyan)' : 'white' }}>
-                    #{user.rank}
-                  </td>
-                  <td style={{ padding: '1.25rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
-                      <div style={{ width: '2rem', height: '2.5rem', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                        <User size={16} color={index < 3 ? 'var(--cyber-purple)' : 'var(--text-muted)'} />
-                      </div>
-                      <span style={{ fontWeight: 700 }}>{user.username}</span>
-                    </div>
-                  </td>
-                  <td style={{ padding: '1.25rem' }}>
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                      <Target size={14} color="var(--cyber-cyan)" />
-                      {user.solved}
-                    </div>
-                  </td>
-                  <td style={{ padding: '1.25rem', textAlign: 'right', fontWeight: 900, fontFamily: 'var(--font-orbitron)' }}>
-                    <span className={index < 3 ? 'neon-text-purple' : ''}>{user.points}</span>
-                  </td>
-                </motion.tr>
-              ))}
-            </tbody>
-          </table>
+        {/* List View with Pagination */}
+        <div className="glass-card" style={{ padding: '1rem', background: 'rgba(5, 5, 5, 0.5)', overflow: 'hidden' }}>
+          <div style={{ minWidth: '800px' }}>
+            <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+              <thead>
+                <tr style={{ borderBottom: '1px solid rgba(255, 255, 255, 0.05)' }}>
+                  <th style={{ padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontFamily: 'var(--font-orbitron)' }}>RANK</th>
+                  <th style={{ padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontFamily: 'var(--font-orbitron)' }}>USER</th>
+                  <th style={{ padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontFamily: 'var(--font-orbitron)' }}>SOLVED</th>
+                  <th style={{ padding: '1.5rem', color: 'var(--text-muted)', fontSize: '0.8rem', fontFamily: 'var(--font-orbitron)', textAlign: 'right' }}>POINTS</th>
+                </tr>
+              </thead>
+              <tbody style={{ position: 'relative' }}>
+                <AnimatePresence mode="wait">
+                  <motion.tr
+                    key={currentPage}
+                    initial={{ opacity: 0, x: 20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    exit={{ opacity: 0, x: -20 }}
+                    transition={{ duration: 0.3 }}
+                    style={{ display: 'contents' }}
+                  >
+                    {currentRows.map((user, index) => (
+                      <tr
+                        key={user.rank}
+                        style={{ 
+                          borderBottom: '1px solid rgba(255, 255, 255, 0.03)',
+                          background: index % 2 === 0 ? 'rgba(255, 255, 255, 0.01)' : 'transparent'
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.background = 'rgba(188, 19, 254, 0.05)'}
+                        onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? 'rgba(255, 255, 255, 0.01)' : 'transparent'}
+                      >
+                        <td style={{ padding: '1.25rem', fontWeight: 800, color: user.rank <= 3 ? 'var(--cyber-cyan)' : 'white' }}>
+                          #{user.rank}
+                        </td>
+                        <td style={{ padding: '1.25rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>
+                            <div style={{ width: '2rem', height: '2.5rem', background: 'rgba(255, 255, 255, 0.05)', borderRadius: '0.5rem', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <User size={16} color={user.rank <= 3 ? 'var(--cyber-purple)' : 'var(--text-muted)'} />
+                            </div>
+                            <span style={{ fontWeight: 700 }}>{user.username}</span>
+                          </div>
+                        </td>
+                        <td style={{ padding: '1.25rem' }}>
+                          <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                            <Target size={14} color="var(--cyber-cyan)" />
+                            {user.solved}
+                          </div>
+                        </td>
+                        <td style={{ padding: '1.25rem', textAlign: 'right', fontWeight: 900, fontFamily: 'var(--font-orbitron)' }}>
+                          <span className={user.rank <= 3 ? 'neon-text-purple' : ''}>{user.points}</span>
+                        </td>
+                      </tr>
+                    ))}
+                  </motion.tr>
+                </AnimatePresence>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        {/* Pagination Controller */}
+        <div style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', gap: '1rem', marginTop: '3rem' }}>
+          <button
+            onClick={() => paginate(currentPage - 1)}
+            disabled={currentPage === 1}
+            style={{
+              padding: '0.5rem',
+              background: 'transparent',
+              color: currentPage === 1 ? 'rgba(255, 255, 255, 0.1)' : 'var(--cyber-cyan)',
+              cursor: currentPage === 1 ? 'default' : 'pointer',
+              transition: 'all 0.3s'
+            }}
+          >
+            <ChevronLeft size={24} />
+          </button>
+
+          <div style={{ display: 'flex', gap: '0.5rem' }}>
+            {Array.from({ length: totalPages }, (_, i) => i + 1).map((number) => (
+              <button
+                key={number}
+                onClick={() => paginate(number)}
+                style={{
+                  width: '3rem',
+                  height: '3rem',
+                  borderRadius: '0.5rem',
+                  background: currentPage === number ? 'var(--cyber-purple)' : 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid',
+                  borderColor: currentPage === number ? 'var(--cyber-purple)' : 'rgba(255, 255, 255, 0.1)',
+                  color: 'white',
+                  fontWeight: 800,
+                  fontFamily: 'var(--font-orbitron)',
+                  cursor: 'pointer',
+                  transition: 'all 0.3s',
+                  boxShadow: currentPage === number ? 'var(--neon-purple-shadow)' : 'none'
+                }}
+              >
+                {number}
+              </button>
+            ))}
+            
+            {/* Simulated extended pagination for larger sets */}
+            {totalPages < 10 && (
+              <span style={{ display: 'flex', alignItems: 'center', padding: '0 0.5rem', color: 'var(--text-muted)' }}>...</span>
+            )}
+            {totalPages < 10 && (
+              <button
+                style={{
+                  width: '3rem',
+                  height: '3rem',
+                  borderRadius: '0.5rem',
+                  background: 'rgba(255, 255, 255, 0.05)',
+                  border: '1px solid rgba(255, 255, 255, 0.1)',
+                  color: 'white',
+                  fontWeight: 800,
+                  fontFamily: 'var(--font-orbitron)',
+                  opacity: 0.5,
+                  cursor: 'default'
+                }}
+              >
+                10
+              </button>
+            )}
+          </div>
+
+          <button
+            onClick={() => paginate(currentPage + 1)}
+            disabled={currentPage === totalPages}
+            style={{
+              padding: '0.5rem',
+              background: 'transparent',
+              color: currentPage === totalPages ? 'rgba(255, 255, 255, 0.1)' : 'var(--cyber-cyan)',
+              cursor: currentPage === totalPages ? 'default' : 'pointer',
+              transition: 'all 0.3s'
+            }}
+          >
+            <ChevronRight size={24} />
+          </button>
         </div>
       </div>
     </section>
