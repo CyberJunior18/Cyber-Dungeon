@@ -51,8 +51,8 @@ const Leaderboard = () => {
               boxShadow: '0 0 15px rgba(188, 19, 254, 0.5)'
             }}></div>
             <p style={{ color: 'var(--text-muted)', marginTop: '2rem', maxWidth: '35rem', margin: '2rem auto 0', fontSize: '1.1rem' }}>
-              The top neural architects currently dominating the cyber dungeon. 
-              Only the elite survive the breach.
+              The top players dominating the challenges.<br></br>
+              Only the sharpest minds climb to the top.
             </p>
           </motion.div>
         </div>
