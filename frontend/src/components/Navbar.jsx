@@ -81,14 +81,17 @@ const Navbar = ({ user, points, onAuthClick, onLogout, view, onViewChange }) => 
                 </span>
               </div>
               
-              <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}>
+              <div 
+                onClick={() => onViewChange('profile')}
+                style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}
+              >
                 <div style={{ textAlign: 'right' }}>
                   <div style={{ fontSize: '0.75rem', fontWeight: 800, color: 'white' }}>{user.username}</div>
                   <button 
-                    onClick={onLogout}
+                    onClick={(e) => { e.stopPropagation(); onLogout(); }}
                     style={{ background: 'transparent', border: 'none', color: 'var(--cyber-pink)', fontSize: '0.6rem', fontWeight: 800, padding: 0, cursor: 'pointer' }}
                   >
-                    DISCONNECT
+                    LOG OUT
                   </button>
                 </div>
                 <div style={{ 
@@ -100,9 +103,14 @@ const Navbar = ({ user, points, onAuthClick, onLogout, view, onViewChange }) => 
                   alignItems: 'center', 
                   justifyContent: 'center',
                   border: '2px solid rgba(255, 255, 255, 0.1)',
-                  boxShadow: 'var(--neon-purple-shadow)'
+                  boxShadow: 'var(--neon-purple-shadow)',
+                  overflow: 'hidden'
                 }}>
-                  <User size={20} color="white" />
+                  {user.avatar ? (
+                    <img src={user.avatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                  ) : (
+                    <User size={20} color="white" />
+                  )}
                 </div>
               </div>
             </div>
@@ -114,7 +122,7 @@ const Navbar = ({ user, points, onAuthClick, onLogout, view, onViewChange }) => 
               onClick={onAuthClick}
               style={{ fontSize: '0.75rem', padding: '0.6rem 1.5rem' }}
             >
-              INITIALIZE LINK
+              LOG IN
             </motion.button>
           )}
         </div>
@@ -159,9 +167,9 @@ const Navbar = ({ user, points, onAuthClick, onLogout, view, onViewChange }) => 
                   </button>
                 ))}
                 {!user ? (
-                  <button className="btn-primary" onClick={() => { onAuthClick(); setIsOpen(false); }} style={{ width: '100%' }}>INITIALIZE LINK</button>
+                  <button className="btn-primary" onClick={() => { onAuthClick(); setIsOpen(false); }} style={{ width: '100%' }}>LOG IN</button>
                 ) : (
-                  <button className="btn-outline" onClick={() => { onLogout(); setIsOpen(false); }} style={{ width: '100%' }}>DISCONNECT</button>
+                  <button className="btn-outline" onClick={() => { onLogout(); setIsOpen(false); }} style={{ width: '100%' }}>LOG OUT</button>
                 )}
               </div>
             </div>

@@ -8,6 +8,8 @@ import Challenges from './components/Challenges';
 import Leaderboard from './components/Leaderboard';
 import Lessons from './components/Lessons';
 import LessonDetail from './components/LessonDetail';
+import Profile from './components/Profile';
+import { api } from './api';
 
 function App() {
   const [user, setUser] = useState(null);
@@ -16,19 +18,50 @@ function App() {
   const [view, setView] = useState('landing');
   const [selectedLessonTitle, setSelectedLessonTitle] = useState(null);
 
+  // Restore authenticated session on mount
+  useEffect(() => {
+    const token = api.getToken();
+    if (token) {
+      api.getCurrentUser()
+        .then(userData => {
+          setUser(userData);
+          setPoints(userData.points || 0);
+        })
+        .catch(err => {
+          console.error("Neural link broken, session expired.", err);
+          api.removeToken();
+          setUser(null);
+        });
+    }
+  }, []);
+
   const handleLogin = (userData) => {
     setUser(userData);
+    setPoints(userData.points || 0);
     setView('dashboard');
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    await api.logout();
     setUser(null);
+    setPoints(0);
     setView('landing');
   };
 
-  const handlePointsUpdate = (newPoints) => {
-    const totalPoints = points + newPoints;
-    setPoints(totalPoints);
+  const handlePointsUpdate = async (challengeId, flag) => {
+    try {
+      const response = await api.solveChallenge(challengeId, flag);
+      setUser(response);
+      setPoints(response.points || 0);
+    } catch (err) {
+      console.error("Submitting flag error:", err);
+      throw err;
+    }
+  };
+
+  const handleUserUpdate = (updatedUserData) => {
+    setUser(updatedUserData);
+    setPoints(updatedUserData.points || 0);
   };
 
   return (
@@ -65,7 +98,7 @@ function App() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5 }}
             >
-              <Challenges onPointsUpdate={handlePointsUpdate} />
+              <Challenges currentUser={user} onPointsUpdate={handlePointsUpdate} solvedChallenges={user?.solved_challenges || []} />
             </motion.div>
           ) : view === 'lessons' ? (
             <motion.div
@@ -87,7 +120,7 @@ function App() {
             >
               <LessonDetail lessonTitle={selectedLessonTitle} onBack={() => setView('lessons')} />
             </motion.div>
-          ) : (
+          ) : view === 'leaderboard' ? (
             <motion.div
               key="leaderboard"
               initial={{ opacity: 0, scale: 0.95 }}
@@ -97,7 +130,22 @@ function App() {
             >
               <Leaderboard />
             </motion.div>
-          )}
+          ) : view === 'profile' ? (
+            <motion.div
+              key="profile"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+            >
+              <Profile 
+                user={user} 
+                onUserUpdate={handleUserUpdate} 
+                onLogout={handleLogout} 
+                onViewChange={setView} 
+              />
+            </motion.div>
+          ) : null}
         </AnimatePresence>
       </main>
 

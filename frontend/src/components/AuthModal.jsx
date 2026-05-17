@@ -1,18 +1,32 @@
 import { useState } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { X, Lock, Mail, User, Zap } from 'lucide-react';
+import { X, Lock, Mail, User, AlertTriangle } from 'lucide-react';
+import { api } from '../api';
 
 const AuthModal = ({ isOpen, onClose, onLogin }) => {
   const [isLogin, setIsLogin] = useState(true);
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [username, setUsername] = useState('');
+  const [error, setError] = useState('');
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    // Frontend only: simulate login
-    onLogin({ username: username || email.split('@')[0], email });
-    onClose();
+    setError('');
+    try {
+      if (isLogin) {
+        const response = await api.login(email, password);
+        api.setToken(response.token);
+        onLogin(response.user);
+      } else {
+        const response = await api.register(username, email, password);
+        api.setToken(response.token);
+        onLogin(response.user);
+      }
+      onClose();
+    } catch (err) {
+      setError(err.message || 'Authentication failed');
+    }
   };
 
   return (
@@ -49,13 +63,14 @@ const AuthModal = ({ isOpen, onClose, onLogin }) => {
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
             className="glass-card"
             style={{
-              width: '50%',
-              maxW: '450px',
+              width: '100%',
+              maxWidth: '450px',
               padding: '3rem',
               position: 'relative',
               zIndex: 1,
               borderColor: isLogin ? 'var(--cyber-purple)' : 'var(--cyber-cyan)',
-              boxShadow: isLogin ? '0 0 40px rgba(188, 19, 254, 0.1)' : '0 0 40px rgba(0, 243, 255, 0.1)'
+              boxShadow: isLogin ? '0 0 40px rgba(188, 19, 254, 0.1)' : '0 0 40px rgba(0, 243, 255, 0.1)',
+              background: 'rgba(5, 5, 5, 0.95)'
             }}
           >
             <button
@@ -65,20 +80,22 @@ const AuthModal = ({ isOpen, onClose, onLogin }) => {
                 top: '1.5rem',
                 right: '1.5rem',
                 background: 'transparent',
-                color: 'var(--text-muted)'
+                border: 'none',
+                color: 'var(--text-muted)',
+                cursor: 'pointer'
               }}
             >
               <X size={24} />
             </button>
 
             <div style={{ textAlign: 'center', marginBottom: '2.5rem' }}>
-              <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '0.5rem' }}>
-                {isLogin ? 'ACCESS' : 'INITIALIZE'} <span className={isLogin ? 'neon-text-purple' : 'neon-text-cyan'}>
-                  {isLogin ? 'TERMINAL' : 'NODE'}
+              <h2 style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '0.5rem', color: 'white' }}>
+                USER <span className={isLogin ? 'neon-text-purple' : 'neon-text-cyan'}>
+                  {isLogin ? 'LOGIN' : 'REGISTER'}
                 </span>
               </h2>
               <p style={{ color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-                {isLogin ? 'Enter your credentials to link neural interface' : 'Register your neural signature on the network'}
+                {isLogin ? 'Enter your credentials to access your account' : 'Create an account to start solving CTF challenges'}
               </p>
             </div>
 
@@ -95,7 +112,7 @@ const AuthModal = ({ isOpen, onClose, onLogin }) => {
                     style={{
                       width: '100%',
                       padding: '1rem 1rem 1rem 3rem',
-                      background: 'rgba(255, 255, 255, 0.03)',
+                      background: 'rgba(0, 0, 0, 0.4)',
                       border: '1px solid rgba(255, 255, 255, 0.1)',
                       borderRadius: '0.75rem',
                       color: 'white',
@@ -107,17 +124,21 @@ const AuthModal = ({ isOpen, onClose, onLogin }) => {
               )}
 
               <div style={{ position: 'relative' }}>
-                <Mail size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: isLogin ? 'var(--cyber-purple)' : 'var(--cyber-cyan)' }} />
+                {isLogin ? (
+                  <User size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--cyber-purple)' }} />
+                ) : (
+                  <Mail size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--cyber-cyan)' }} />
+                )}
                 <input
-                  type="email"
-                  placeholder="NEURAL@NETWORK.COM"
+                  type={isLogin ? "text" : "email"}
+                  placeholder={isLogin ? "EMAIL OR USERNAME" : "EMAIL ADDRESS"}
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                   style={{
                     width: '100%',
                     padding: '1rem 1rem 1rem 3rem',
-                    background: 'rgba(255, 255, 255, 0.03)',
+                    background: 'rgba(0, 0, 0, 0.4)',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
                     borderRadius: '0.75rem',
                     color: 'white',
@@ -131,14 +152,14 @@ const AuthModal = ({ isOpen, onClose, onLogin }) => {
                 <Lock size={18} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: isLogin ? 'var(--cyber-purple)' : 'var(--cyber-cyan)' }} />
                 <input
                   type="password"
-                  placeholder="ENCRYPTED_KEY"
+                  placeholder="PASSWORD"
                   required
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   style={{
                     width: '100%',
                     padding: '1rem 1rem 1rem 3rem',
-                    background: 'rgba(255, 255, 255, 0.03)',
+                    background: 'rgba(0, 0, 0, 0.4)',
                     border: '1px solid rgba(255, 255, 255, 0.1)',
                     borderRadius: '0.75rem',
                     color: 'white',
@@ -148,12 +169,30 @@ const AuthModal = ({ isOpen, onClose, onLogin }) => {
                 />
               </div>
 
+              {error && (
+                <div style={{
+                  color: 'var(--cyber-pink)',
+                  fontSize: '0.8rem',
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: '0.5rem',
+                  padding: '0.75rem',
+                  background: 'rgba(255, 105, 180, 0.1)',
+                  borderRadius: '0.5rem',
+                  border: '1px solid rgba(255, 105, 180, 0.2)',
+                  fontFamily: 'var(--font-orbitron)'
+                }}>
+                  <AlertTriangle size={16} />
+                  {error}
+                </div>
+              )}
+
               <button
                 type="submit"
                 className={isLogin ? 'btn-primary' : 'btn-outline'}
-                style={{ width: '100%', padding: '1.25rem', marginTop: '1rem' }}
+                style={{ width: '100%', padding: '1.25rem', marginTop: '1rem', fontWeight: 800, fontFamily: 'var(--font-orbitron)' }}
               >
-                {isLogin ? 'INITIALIZE LINK' : 'CREATE NODE'}
+                {isLogin ? 'LOG IN' : 'REGISTER'}
               </button>
             </form>
 
@@ -162,14 +201,16 @@ const AuthModal = ({ isOpen, onClose, onLogin }) => {
                 onClick={() => setIsLogin(!isLogin)}
                 style={{
                   background: 'transparent',
+                  border: 'none',
                   color: 'var(--text-muted)',
                   fontSize: '0.85rem',
                   fontFamily: 'var(--font-orbitron)',
                   textTransform: 'uppercase',
-                  letterSpacing: '1px'
+                  letterSpacing: '1px',
+                  cursor: 'pointer'
                 }}
               >
-                {isLogin ? "Don't have a node? Create one" : "Already registered? Initialize link"}
+                {isLogin ? "Don't have an account? Sign up" : "Already have an account? Log in"}
               </button>
             </div>
           </motion.div>

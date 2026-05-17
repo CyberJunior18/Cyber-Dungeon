@@ -46,7 +46,7 @@ const Home = ({ onGetStarted, onViewChange }) => {
         >
           <Activity size={18} className="neon-text-cyan" />
           <span style={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '3px', color: 'var(--cyber-cyan)', textTransform: 'uppercase' }}>
-            System Protocol Active: v4.2.0
+            CTF Training Platform Active: v4.2.0
           </span>
         </motion.div>
 
@@ -82,7 +82,7 @@ const Home = ({ onGetStarted, onViewChange }) => {
             onClick={onGetStarted}
             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}
           >
-            GET ACCESS <ChevronRight size={22} />
+            GET STARTED <ChevronRight size={22} />
           </button>
           <button className="btn-outline" style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }} onClick={() => onViewChange('lessons')}>
             <Zap size={22} /> START LEARNING
