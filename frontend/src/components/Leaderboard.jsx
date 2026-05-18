@@ -284,29 +284,6 @@ const Leaderboard = () => {
                 {number}
               </button>
             ))}
-
-            {/* Simulated extended pagination for larger sets */}
-            {totalPages < 10 && (
-              <span style={{ display: 'flex', alignItems: 'center', padding: '0 0.5rem', color: 'var(--text-muted)' }}>...</span>
-            )}
-            {totalPages < 10 && (
-              <button
-                style={{
-                  width: '3rem',
-                  height: '3rem',
-                  borderRadius: '0.5rem',
-                  background: 'rgba(255, 255, 255, 0.05)',
-                  border: '1px solid rgba(255, 255, 255, 0.1)',
-                  color: 'white',
-                  fontWeight: 800,
-                  fontFamily: 'var(--font-orbitron)',
-                  opacity: 0.5,
-                  cursor: 'default'
-                }}
-              >
-                10
-              </button>
-            )}
           </div>
 
           <button

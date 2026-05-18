@@ -15,8 +15,30 @@ function App() {
   const [user, setUser] = useState(null);
   const [points, setPoints] = useState(0);
   const [isAuthModalOpen, setIsAuthModalOpen] = useState(false);
-  const [view, setView] = useState('landing');
-  const [selectedLessonTitle, setSelectedLessonTitle] = useState(null);
+
+  const [view, setView] = useState(() => {
+    const savedView = localStorage.getItem('cyber_view') || 'landing';
+    const token = api.getToken();
+    const protectedViews = ['dashboard', 'profile'];
+    if (protectedViews.includes(savedView) && !token) {
+      return 'landing';
+    }
+    return savedView;
+  });
+
+  const [selectedLessonTitle, setSelectedLessonTitle] = useState(() => {
+    return localStorage.getItem('cyber_selected_lesson') || null;
+  });
+
+  // Synchronize navigation view to localStorage
+  useEffect(() => {
+    localStorage.setItem('cyber_view', view);
+    if (view === 'lesson' && selectedLessonTitle) {
+      localStorage.setItem('cyber_selected_lesson', selectedLessonTitle);
+    } else if (view !== 'lesson') {
+      localStorage.removeItem('cyber_selected_lesson');
+    }
+  }, [view, selectedLessonTitle]);
 
   // Restore authenticated session on mount
   useEffect(() => {
@@ -28,12 +50,18 @@ function App() {
           setPoints(userData.points || 0);
         })
         .catch(err => {
-          console.error("Neural link broken, session expired.", err);
+          console.error("Session expired.", err);
           api.removeToken();
           setUser(null);
+          setView('landing');
         });
+    } else {
+      const protectedViews = ['dashboard', 'profile'];
+      if (protectedViews.includes(view)) {
+        setView('landing');
+      }
     }
-  }, []);
+  }, [view]);
 
   const handleLogin = (userData) => {
     setUser(userData);

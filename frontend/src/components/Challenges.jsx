@@ -241,34 +241,6 @@ const ChallengeModal = ({ challenge, isOpen, onClose, onSolve, isSolved, current
                 {challenge.description}
               </p>
 
-              {fileAsset && (
-                <div style={{ marginBottom: '2rem' }}>
-                  <span style={{ fontSize: '0.75rem', color: 'var(--text-muted)', textTransform: 'uppercase', display: 'block', marginBottom: '0.5rem', letterSpacing: '1px' }}>Download Source Files</span>
-                  <a
-                    href={fileAsset}
-                    download
-                    style={{
-                      display: 'inline-flex',
-                      alignItems: 'center',
-                      gap: '0.5rem',
-                      padding: '0.6rem 1.2rem',
-                      background: 'rgba(0, 243, 255, 0.05)',
-                      border: '1px solid rgba(0, 243, 255, 0.2)',
-                      borderRadius: '0.5rem',
-                      color: 'var(--cyber-cyan)',
-                      textDecoration: 'none',
-                      fontSize: '0.8rem',
-                      fontFamily: 'var(--font-orbitron)',
-                      fontWeight: 700
-                    }}
-                    onMouseEnter={(e) => e.target.style.background = 'rgba(0, 243, 255, 0.1)'}
-                    onMouseLeave={(e) => e.target.style.background = 'rgba(0, 243, 255, 0.05)'}
-                  >
-                    📂 DOWNLOAD FILE
-                  </a>
-                </div>
-              )}
-
               {/* Creator details */}
               {challenge.creator && (
                 <div style={{ marginBottom: '2rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>

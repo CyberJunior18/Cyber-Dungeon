@@ -5,10 +5,10 @@ const Home = ({ onGetStarted, onViewChange }) => {
   return (
     <section id="home" className="home-section">
       <div className="home-grid"></div>
-      
+
       {/* Dynamic Background Glows */}
-      <motion.div 
-        animate={{ 
+      <motion.div
+        animate={{
           scale: [1, 1.2, 1],
           opacity: [0.3, 0.5, 0.3],
         }}
@@ -28,29 +28,7 @@ const Home = ({ onGetStarted, onViewChange }) => {
       ></motion.div>
 
       <div className="container home-content">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.8 }}
-          style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '0.75rem',
-            padding: '0.6rem 1.25rem',
-            borderRadius: '3rem',
-            background: 'rgba(255, 255, 255, 0.03)',
-            border: '1px solid rgba(255, 255, 255, 0.08)',
-            marginBottom: '2.5rem',
-            backdropFilter: 'blur(10px)'
-          }}
-        >
-          <Activity size={18} className="neon-text-cyan" />
-          <span style={{ fontSize: '0.8rem', fontWeight: 700, letterSpacing: '3px', color: 'var(--cyber-cyan)', textTransform: 'uppercase' }}>
-            CTF Training Platform Active: v4.2.0
-          </span>
-        </motion.div>
-
-        <motion.h1 
+        <motion.h1
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ duration: 1, delay: 0.2 }}
@@ -66,8 +44,8 @@ const Home = ({ onGetStarted, onViewChange }) => {
           transition={{ duration: 1, delay: 0.5 }}
           className="home-subtitle"
         >
-          Your friendly gateway to the world of cyber security. 
-          Learn, practice, and master CTF challenges in a safe, 
+          Your friendly gateway to the world of cyber security.
+          Learn, practice, and master CTF challenges in a safe,
           hands-on environment designed for learning and growth.
         </motion.p>
 
@@ -77,8 +55,8 @@ const Home = ({ onGetStarted, onViewChange }) => {
           transition={{ duration: 0.8, delay: 0.8 }}
           style={{ display: 'flex', gap: '2rem', justifyContent: 'center', flexWrap: 'wrap' }}
         >
-          <button 
-            className="btn-primary" 
+          <button
+            className="btn-primary"
             onClick={onGetStarted}
             style={{ display: 'flex', alignItems: 'center', gap: '0.75rem' }}
           >
@@ -92,8 +70,8 @@ const Home = ({ onGetStarted, onViewChange }) => {
 
       {/* Decorative Floating Elements */}
       <motion.div
-        animate={{ 
-          y: [0, -30, 0], 
+        animate={{
+          y: [0, -30, 0],
           rotate: [45, 60, 45],
           opacity: [0.1, 0.2, 0.1]
         }}
@@ -110,9 +88,9 @@ const Home = ({ onGetStarted, onViewChange }) => {
           pointerEvents: 'none'
         }}
       ></motion.div>
-      
+
       <motion.div
-        animate={{ 
+        animate={{
           x: [0, 20, 0],
           y: [0, 40, 0],
           rotate: [-20, -10, -20],
