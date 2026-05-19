@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Menu, X, Cpu, User, LogOut, Award } from 'lucide-react';
+import { Menu, X, User, Award } from 'lucide-react';
+import logoUrl from '../assets/logo2.png';
 
 const Navbar = ({ user, points, onAuthClick, onLogout, view, onViewChange }) => {
   const [isOpen, setIsOpen] = useState(false);
@@ -25,25 +26,21 @@ const Navbar = ({ user, points, onAuthClick, onLogout, view, onViewChange }) => 
     <nav className={`navbar ${scrolled ? 'scrolled' : ''}`}>
       <div className="container nav-container">
         <motion.div 
-          whileHover={{ scale: 1.05 }}
+          whileHover={{ scale: 1.03 }}
           className="nav-logo"
           onClick={() => onViewChange('landing')}
+          aria-label="Cyber Dungeon home"
         >
-          <div style={{
-            padding: '0.6rem',
-            background: 'rgba(188, 19, 254, 0.1)',
-            borderRadius: '0.75rem',
-            border: '1px solid rgba(188, 19, 254, 0.3)',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            boxShadow: 'var(--neon-purple-shadow)'
-          }}>
-            <Cpu size={24} color="#bc13fe" />
-          </div>
-          <span className="neon-text-purple" style={{ fontWeight: 900 }}>
-            CYBER<span style={{ color: 'white' }}>DUNGEON</span>
-          </span>
+          <img
+            src={logoUrl}
+            alt="Cyber Dungeon"
+            style={{
+              display: 'block',
+              width: 'min(210px, 42vw)',
+              height: 'auto',
+              objectFit: 'contain',
+            }}
+          />
         </motion.div>
 
         <div className="nav-links">

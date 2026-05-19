@@ -1,5 +1,6 @@
 import { motion } from 'framer-motion';
-import { Cpu, Github, Twitter, Linkedin, Mail } from 'lucide-react';
+import { Github, Twitter, Linkedin, Mail } from 'lucide-react';
+import logoUrl from '../assets/logo2.png';
 
 const Footer = () => {
   return (
@@ -7,14 +8,17 @@ const Footer = () => {
       <div className="container">
         <div className="footer-grid">
           <div style={{ gridColumn: 'span 2' }}>
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.75rem', marginBottom: '1.5rem' }}>
-              <div style={{ padding: '0.5rem', background: 'rgba(188, 19, 254, 0.1)', borderRadius: '0.5rem', border: '1px solid rgba(188, 19, 254, 0.3)' }}>
-                <Cpu size={24} color="#bc13fe" />
-              </div>
-              <span style={{ fontFamily: 'var(--font-orbitron)', fontWeight: 900, fontSize: '1.25rem' }}>
-                CYBER<span className="neon-text-purple">DUNGEON</span>
-              </span>
-            </div>
+            <img
+              src={logoUrl}
+              alt="Cyber Dungeon"
+              style={{
+                display: 'block',
+                width: 'min(220px, 70vw)',
+                height: 'auto',
+                objectFit: 'contain',
+                marginBottom: '1.5rem'
+              }}
+            />
             <p style={{ color: 'var(--text-muted)', maxWidth: '24rem', fontSize: '0.95rem', lineHeight: 1.6 }}>
               This is your place to start hacking, try challenges, make mistakes, and learn how things really work step by step as you grow your skills in cybersecurity.
             </p>

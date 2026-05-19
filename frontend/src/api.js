@@ -1,10 +1,10 @@
 const API_URL = 'http://localhost:8000/api';
 
-const getHeaders = () => {
+const getHeaders = ({ json = true } = {}) => {
   const token = localStorage.getItem('cyber_token');
   return {
-    'Content-Type': 'application/json',
     'Accept': 'application/json',
+    ...(json ? { 'Content-Type': 'application/json' } : {}),
     ...(token ? { 'Authorization': `Bearer ${token}` } : {}),
   };
 };
@@ -101,10 +101,22 @@ export const api = {
   },
 
   createChallenge: async (challengeData) => {
+    const hasAttachment = challengeData.attachment instanceof File;
+    let body = JSON.stringify(challengeData);
+
+    if (hasAttachment) {
+      body = new FormData();
+      Object.entries(challengeData).forEach(([key, value]) => {
+        if (value !== null && value !== undefined) {
+          body.append(key, value);
+        }
+      });
+    }
+
     const response = await fetch(`${API_URL}/challenges`, {
       method: 'POST',
-      headers: getHeaders(),
-      body: JSON.stringify(challengeData),
+      headers: getHeaders({ json: !hasAttachment }),
+      body,
     });
     const data = await response.json();
     if (!response.ok) {

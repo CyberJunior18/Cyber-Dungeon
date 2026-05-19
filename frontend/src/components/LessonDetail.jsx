@@ -1,56 +1,113 @@
 import { motion, AnimatePresence } from 'framer-motion';
-import { ChevronLeft, ChevronRight, BookOpen, Video, FileText, Code, CheckCircle, AlertCircle, Zap } from 'lucide-react';
+import { ChevronLeft, ChevronRight, CheckCircle, AlertCircle, Zap, Download, Paperclip } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { lessonData } from '../data/lessons';
 
-const lessonData = [
-  {
-    id: 1,
-    title: 'Introduction to CTFs',
-    category: 'General',
-    duration: '10 min',
-    description: 'Learn the basics of Capture The Flag competitions and the common categories you will encounter.',
-    icon: BookOpen,
-    color: 'var(--cyber-cyan)',
-    parts: ["Capture The Flag (CTF) competitions are cybersecurity contests where participants solve puzzles and exploit vulnerabilities to find hidden text strings, known as \"flags\". They are designed to simulate real-world security scenarios in a legal, gamified, and controlled environment"],
-    challenges: "Capture the flag: submit this flag CYBER{Learning_About_CTFs}",
-    flag: "CYBER{Learning_About_CTFs}"
-  },
-  {
-    id: 2,
-    title: 'Web Exploitation Basics',
-    category: 'Web',
-    duration: '25 min',
-    description: 'Understand how web applications work and how to identify common vulnerabilities like SQL Injection.',
-    icon: Code,
-    color: 'var(--cyber-purple)',
-    parts: ["Web exploitation basics involve finding and exploiting vulnerabilities in web applications to gain unauthorized access, steal sensitive data, or take control of web servers. These vulnerabilities often arise from improper validation of user input or insecure server configurations.", "Core Web Exploitation Concepts\n\nHTTP Requests & Responses: Understanding how browsers communicate with servers (GET, POST, headers, cookies) is fundamental, as attackers often modify these requests.\n\nUser Input Validation: Most attacks occur because applications trust user input too much. Attackers submit malicious data to trigger bugs.\n\nReconnaissance: Gathering information about a target (e.g., identifying server types, finding hidden files/directories) using tools like DirBuster.\n\nStatelessness: HTTP is stateless, meaning servers use sessions and cookies to track users. Exploiting these mechanisms can lead to session hijacking.", "Top Web Vulnerabilities\n\nSQL Injection (SQLi): Inserting malicious SQL commands into input fields (e.g., login forms) to manipulate the backend database, extract data, or bypass authentication.\n\nCross-Site Scripting (XSS): Injecting malicious JavaScript into a web page that executes in the browser of another user. It is used to steal session cookies or deface websites.\n\nCommand Injection: Executing unauthorized operating system commands on the server by inputting system commands into application forms.\n\nBroken Access Control (IDOR): Insecure Direct Object References occur when an app exposes references to internal objects (e.g., files, database keys), allowing users to access data they should not, such as other users' profiles.\n\nDirectory/File Traversal: Manipulating file paths (e.g., ../../etc/passwd) to access sensitive files outside the intended web directory.\n\nFile Upload Vulnerabilities: Uploading malicious scripts (like a PHP web shell) disguised as legitimate files (e.g., images) to gain remote code execution on the server."],
-    challenges: "Breach the local administrative node. Flag hidden in system logs.",
-    flag: "CYBER{w3b_3xpl01t_m4st3r}"
-  },
-  {
-    id: 3,
-    title: 'Cryptography Fundamentals',
-    category: 'Crypto',
-    duration: '20 min',
-    description: 'A deep dive into ciphers, hashing, and the math behind securing information.',
-    icon: FileText,
-    color: 'var(--cyber-pink)',
-    parts: ["Cryptography is the science of protecting information by transforming it into a secure, unreadable format. It serves as the foundation for modern cybersecurity, relying on mathematical algorithms and keys to ensure data privacy, prevent unauthorized tampering, and verify the identities of communicating parties.", "The Core Principles (The Goals)\n\nModern cryptography is built on four fundamental pillars:\n\nConfidentiality: Ensures that intercepted data remains completely unreadable to unauthorized parties.\n\nIntegrity: Guarantees that data has not been maliciously altered, tampered with, or corrupted in transit.\n\nAuthentication: Verifies the identities of the sender and receiver, ensuring data comes from a trusted source.\n\nNon-Repudiation: Prevents a sender from denying they sent a message or signed a specific document.", "Tools: Some common tools to decrypt:\n\nCyberChef - A well known tool mainly used for cryptography and decrypting, it is very famous in CTF communities and is open source for anyone to view and modify.\n\nHashcat - For cracking hashes and encrypted passwords.\n\nJohn the Ripper - Another powerful password cracking tool."],
-    challenges: "Decrypt this message: Q1lCRVJ7SS1Mb3ZlLWJ1aWxkaW5nLXNlY3VyZS13ZWItYXBwc30K",
-    flag: "CYBER{I-Love-building-secure-web-apps}"
-  },
-  {
-    id: 4,
-    title: 'Reverse Engineering 101',
-    category: 'Reverse',
-    duration: '35 min',
-    description: 'Learn how to decompile programs and understand machine code to find hidden flags.',
-    icon: Video,
-    color: 'var(--cyber-cyan)',
-    parts: ["Reverse engineering is the process of deconstructing a system, device, or software to understand how it works. In a \"101\" or beginner context, it primarily focuses on software—taking a compiled program without its source code and analyzing it to uncover its internal logic, find vulnerabilities, or understand its behavior.", "Core Concepts\n\nBinary Code: Software is written by humans in readable programming languages, then compiled into machine code (binaries) for the computer to run. Reverse engineering aims to translate that machine code back into something humans can read.\n\nAssembly Language: This is the bridge between human-readable code and machine code. You will need a basic grasp of assembly instructions (like MOV, ADD, JMP) to trace how a program moves data and makes decisions.\n\nStatic vs. Dynamic Analysis:\nStatic Analysis: Examining the code and structure without actually running it.\nDynamic Analysis: Running the program in a safe, controlled environment (like a virtual machine) to see how it behaves in real-time.", "Essential Tools\n\nDisassemblers: Tools that convert machine code into readable assembly code (e.g., Ghidra, IDA Pro).\n\nDecompilers: Advanced tools that take assembly code and attempt to convert it into high-level, pseudo-C code.\n\nDebuggers: Programs that let you pause the execution of software line-by-line, inspect memory, and view the status of the CPU (e.g., x64dbg, GDB).", "Common Applications\n\nWhy do people learn reverse engineering?\n\nMalware Analysis: Deconstructing viruses or ransomware to understand what they do, who created them, and how to stop them.\n\nVulnerability Research: Inspecting software to find hidden bugs or security flaws that attackers could exploit.\n\nInteroperability & Modding: Studying proprietary software to make third-party tools, create game mods, or bypass digital locks.\n\nCommon tools for CTFs: exiftool, jadx-gui, and much more!"]
-  }
-];
+const InlineText = ({ children }) => {
+  const text = String(children);
+  const tokens = text.split(/(`[^`]+`|\*\*[^*]+\*\*|\*[^*]+\*)/g).filter(Boolean);
 
+  return tokens.map((token, index) => {
+    if (token.startsWith('**') && token.endsWith('**')) {
+      return <strong key={index} style={{ color: 'white', fontWeight: 850 }}>{token.slice(2, -2)}</strong>;
+    }
+
+    if (token.startsWith('*') && token.endsWith('*')) {
+      return <em key={index} style={{ color: 'var(--cyber-cyan)', fontStyle: 'italic' }}>{token.slice(1, -1)}</em>;
+    }
+
+    if (token.startsWith('`') && token.endsWith('`')) {
+      return (
+        <code
+          key={index}
+          style={{
+            padding: '0.12rem 0.35rem',
+            borderRadius: '0.25rem',
+            background: 'rgba(0, 243, 255, 0.08)',
+            border: '1px solid rgba(0, 243, 255, 0.18)',
+            color: 'var(--cyber-cyan)',
+            fontFamily: 'monospace',
+            fontSize: '0.95em'
+          }}
+        >
+          {token.slice(1, -1)}
+        </code>
+      );
+    }
+
+    return <span key={index}>{token}</span>;
+  });
+};
+
+const RichText = ({ text }) => {
+  const blocks = String(text)
+    .trim()
+    .split(/\n\s*\n/g)
+    .map(block => block.trim())
+    .filter(Boolean);
+
+  return (
+    <div style={{ display: 'grid', gap: '1.35rem' }}>
+      {blocks.map((block, index) => {
+        const lines = block.split('\n').map(line => line.trim()).filter(Boolean);
+        const numbered = lines.every(line => /^\d+\.\s+/.test(line));
+        const bulleted = lines.every(line => /^[-*]\s+/.test(line));
+
+        if (numbered) {
+          return (
+            <ol key={index} style={{ margin: 0, paddingLeft: '1.4rem', color: 'var(--text-main)', lineHeight: 1.85 }}>
+              {lines.map(line => (
+                <li key={line} style={{ paddingLeft: '0.35rem', marginBottom: '0.45rem' }}>
+                  <InlineText>{line.replace(/^\d+\.\s+/, '')}</InlineText>
+                </li>
+              ))}
+            </ol>
+          );
+        }
+
+        if (bulleted) {
+          return (
+            <ul key={index} style={{ margin: 0, paddingLeft: '1.25rem', color: 'var(--text-main)', lineHeight: 1.85 }}>
+              {lines.map(line => (
+                <li key={line} style={{ paddingLeft: '0.35rem', marginBottom: '0.45rem' }}>
+                  <InlineText>{line.replace(/^[-*]\s+/, '')}</InlineText>
+                </li>
+              ))}
+            </ul>
+          );
+        }
+
+        if (lines.length === 1 && /:\s*$/.test(lines[0])) {
+          return (
+            <h3
+              key={index}
+              style={{
+                margin: '0.4rem 0 0',
+                color: 'var(--cyber-cyan)',
+                fontSize: '1.05rem',
+                fontWeight: 900,
+                letterSpacing: '1px'
+              }}
+            >
+              <InlineText>{lines[0].replace(/:\s*$/, '')}</InlineText>
+            </h3>
+          );
+        }
+
+        return (
+          <p key={index} style={{ margin: 0, color: 'var(--text-main)', fontSize: '1.06rem', lineHeight: 1.9 }}>
+            {lines.map((line, lineIndex) => (
+              <span key={`${line}-${lineIndex}`}>
+                {lineIndex > 0 && <br />}
+                <InlineText>{line}</InlineText>
+              </span>
+            ))}
+          </p>
+        );
+      })}
+    </div>
+  );
+};
 
 const LessonDetail = ({ lessonTitle, onBack }) => {
   const lesson = lessonData.find(l => l.title === lessonTitle);
@@ -159,7 +216,11 @@ const LessonDetail = ({ lessonTitle, onBack }) => {
             alignItems: 'flex-start',
             gap: '2rem',
             marginBottom: '3rem',
-            flexWrap: 'wrap'
+            flexWrap: 'wrap',
+            padding: '2rem',
+            border: '1px solid rgba(255, 255, 255, 0.06)',
+            borderRadius: '1rem',
+            background: 'linear-gradient(135deg, rgba(255, 255, 255, 0.035), rgba(0, 243, 255, 0.025))'
           }}>
             <div style={{
               width: '5rem',
@@ -177,9 +238,15 @@ const LessonDetail = ({ lessonTitle, onBack }) => {
             </div>
 
             <div style={{ flex: 1, minWidth: '300px' }}>
+              <p style={{ color: lesson.color, fontSize: '0.78rem', fontFamily: 'var(--font-orbitron)', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
+                Learning Track
+              </p>
               <h1 style={{ fontSize: 'clamp(2rem, 5vw, 3.5rem)', fontWeight: 950, marginBottom: '1rem', lineHeight: 1.1 }}>
                 {lesson.title}
               </h1>
+              <p style={{ maxWidth: '52rem', color: 'var(--text-muted)', fontSize: '1.05rem', lineHeight: 1.7, marginBottom: '1.4rem' }}>
+                {lesson.description}
+              </p>
               <div style={{ display: 'flex', gap: '1.5rem', flexWrap: 'wrap', alignItems: 'center' }}>
                 <p style={{
                   fontSize: '0.9rem',
@@ -207,13 +274,16 @@ const LessonDetail = ({ lessonTitle, onBack }) => {
             </div>
           </div>
 
-          <div className="glass-card" style={{ padding: '3rem', marginBottom: '3rem', minHeight: '300px' }}>
+          <div className="glass-card" style={{ padding: 'clamp(1.5rem, 4vw, 3rem)', marginBottom: '3rem', minHeight: '300px' }}>
             {currentPage === 0 ? (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <h2 style={{ fontSize: '1.75rem', fontWeight: 900, marginBottom: '2rem', color: lesson.color }}>
-                  COURSE OBJECTIVE
+                <p style={{ color: lesson.color, fontSize: '0.76rem', fontFamily: 'var(--font-orbitron)', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '0.65rem' }}>
+                  Course Objective
+                </p>
+                <h2 style={{ fontSize: 'clamp(1.8rem, 4vw, 2.65rem)', fontWeight: 950, marginBottom: '1.2rem', color: 'white', lineHeight: 1.12 }}>
+                  Build a repeatable CTF workflow
                 </h2>
-                <p style={{ fontSize: '1.15rem', lineHeight: 1.8, color: 'var(--text-main)' }}>
+                <p style={{ fontSize: '1.15rem', lineHeight: 1.8, color: 'var(--text-main)', maxWidth: '56rem' }}>
                   {lesson.description}
                 </p>
                 
@@ -226,7 +296,9 @@ const LessonDetail = ({ lessonTitle, onBack }) => {
                       {lesson.parts.map((_, idx) => (
                         <div key={idx} style={{ padding: '1.25rem', background: 'rgba(255, 255, 255, 0.02)', borderRadius: '0.75rem', border: '1px solid rgba(255, 255, 255, 0.05)' }}>
                           <span style={{ fontSize: '0.7rem', color: 'var(--cyber-cyan)', fontWeight: 800 }}>MODULE 0{idx + 1}</span>
-                          <p style={{ fontSize: '0.9rem', marginTop: '0.5rem', color: 'var(--text-muted)' }}>Foundational Concepts</p>
+                          <p style={{ fontSize: '0.95rem', marginTop: '0.5rem', color: 'white', fontWeight: 750 }}>
+                            {lesson.moduleTitles?.[idx] || 'Foundational Concepts'}
+                          </p>
                         </div>
                       ))}
                     </div>
@@ -249,14 +321,46 @@ const LessonDetail = ({ lessonTitle, onBack }) => {
                   border: '1px solid rgba(188, 19, 254, 0.1)',
                   marginBottom: '2.5rem' 
                 }}>
-                  <p style={{ fontSize: '1.1rem', lineHeight: 1.8, color: 'white' }}>
-                    {lesson.challenges}
-                  </p>
+                  <RichText text={lesson.challenges} />
                 </div>
+
+                {lesson.challengeFile && (
+                  <a
+                    href={lesson.challengeFile.url}
+                    download={lesson.challengeFile.name}
+                    target="_blank"
+                    rel="noreferrer"
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      justifyContent: 'space-between',
+                      gap: '1rem',
+                      maxWidth: '600px',
+                      marginBottom: '2.5rem',
+                      padding: '0.9rem 1rem',
+                      background: 'rgba(0, 243, 255, 0.06)',
+                      border: '1px solid rgba(0, 243, 255, 0.25)',
+                      borderRadius: '0.5rem',
+                      color: 'var(--cyber-cyan)',
+                      fontFamily: 'var(--font-orbitron)',
+                      fontSize: '0.82rem',
+                      fontWeight: 800,
+                      letterSpacing: '0.5px'
+                    }}
+                  >
+                    <span style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
+                      <Paperclip size={16} />
+                      <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {lesson.challengeFile.name}
+                      </span>
+                    </span>
+                    <Download size={16} style={{ flexShrink: 0 }} />
+                  </a>
+                )}
 
                 <div style={{ maxWidth: '600px' }}>
                   <label style={{ display: 'block', fontSize: '0.8rem', color: 'var(--text-muted)', fontWeight: 800, marginBottom: '1rem', letterSpacing: '2px' }}>
-                    ENTER DECRYPTED FLAG
+                    ENTER FLAG
                   </label>
                   <div style={{ display: 'flex', gap: '1rem' }}>
                     <input
@@ -264,7 +368,7 @@ const LessonDetail = ({ lessonTitle, onBack }) => {
                       value={flagInput}
                       onChange={(e) => setFlagInput(e.target.value)}
                       onKeyPress={(e) => e.key === 'Enter' && handleFlagSubmit()}
-                      placeholder="CYBER{...}"
+                      placeholder="picoCTF{...}"
                       disabled={isLessonComplete}
                       style={{
                         flex: 1,
@@ -319,19 +423,13 @@ const LessonDetail = ({ lessonTitle, onBack }) => {
               </motion.div>
             ) : (
               <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }}>
-                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '2.5rem', color: 'var(--cyber-cyan)', letterSpacing: '2px' }}>
+                <h2 style={{ fontSize: '1.2rem', fontWeight: 800, marginBottom: '0.75rem', color: 'var(--cyber-cyan)', letterSpacing: '2px' }}>
                   MODULE 0{currentPage}
                 </h2>
-                <div style={{ 
-                  fontSize: '1.1rem', 
-                  lineHeight: 1.9, 
-                  color: 'var(--text-main)', 
-                  whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word',
-                  maxWidth: '100%'
-                }}>
-                  {lesson.parts[currentPage - 1]}
-                </div>
+                <h3 style={{ fontSize: 'clamp(1.45rem, 3vw, 2.1rem)', fontWeight: 950, marginBottom: '2rem', color: 'white', letterSpacing: '1px' }}>
+                  {lesson.moduleTitles?.[currentPage - 1] || 'Foundational Concepts'}
+                </h3>
+                <RichText text={lesson.parts[currentPage - 1]} />
               </motion.div>
             )}
           </div>

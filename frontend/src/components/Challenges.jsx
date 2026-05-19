@@ -1,7 +1,10 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Terminal, Database, Cpu, Globe, ChevronRight, X, Flag, AlertTriangle, Plus, Key, Trash2 } from 'lucide-react';
+import { Shield, Terminal, Database, Cpu, Globe, ChevronRight, X, Flag, AlertTriangle, Plus, Key, Trash2, Upload, Download, Paperclip, ExternalLink } from 'lucide-react';
 import { api } from '../api';
+import encFlagUrl from '../assets/enc_flag.txt?url';
+import gardenUrl from '../assets/garden.jpg?url';
+import logsUrl from '../assets/logs.txt?url';
 
 const categories = ['All', 'Web', 'Crypto', 'Forensics', 'General Knowledge'];
 
@@ -17,9 +20,9 @@ const getCategoryIcon = (category) => {
 
 const getChallengeFiles = (challengeId) => {
   switch (Number(challengeId)) {
-    case 1: return 'assets/cat.jpg';
-    case 3: return 'assets/enc_flag.txt';
-    case 4: return 'assets/logs.txt';
+    case 1: return { url: gardenUrl, name: 'garden.jpg' };
+    case 3: return { url: encFlagUrl, name: 'enc_flag.txt' };
+    case 4: return { url: logsUrl, name: 'logs.txt' };
     default: return null;
   }
 };
@@ -115,14 +118,20 @@ const ChallengeModal = ({ challenge, isOpen, onClose, onSolve, isSolved, current
     return challenge.hint || "No hint";
   };
 
-  const fileAsset = getChallengeFiles(challenge.id);
+  const fileAsset = challenge.attachment_url
+    ? {
+        url: challenge.attachment_url,
+        name: challenge.attachment_name || 'challenge-file',
+        size: challenge.attachment_size,
+      }
+    : getChallengeFiles(challenge.id);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (submitting) return;
 
-    if (!inputFlag.startsWith('Cyber{') || !inputFlag.endsWith('}')) {
-      setError('Flag must be of the form Cyber{flag_content}');
+    if (!/^(Cyber|MUCTF)\{.*\}$/.test(inputFlag)) {
+      setError('Flag must be of the form Cyber{flag_content} or MUCTF{flag_content}');
       return;
     }
 
@@ -236,16 +245,72 @@ const ChallengeModal = ({ challenge, isOpen, onClose, onSolve, isSolved, current
                 color: 'var(--text-muted)',
                 fontSize: '1rem',
                 lineHeight: 1.6,
-                marginBottom: '2rem'
+                marginBottom: challenge.url ? '1rem' : '2rem'
               }}>
                 {challenge.description}
               </p>
+
+              {challenge.url && (
+                <a
+                  href={challenge.url}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    display: 'inline-flex',
+                    alignItems: 'center',
+                    gap: '0.5rem',
+                    color: 'var(--cyber-cyan)',
+                    fontSize: '0.95rem',
+                    fontWeight: 800,
+                    marginBottom: '2rem',
+                    textDecoration: 'underline',
+                    textUnderlineOffset: '4px',
+                    overflowWrap: 'anywhere'
+                  }}
+                >
+                  {challenge.url}
+                  <ExternalLink size={15} />
+                </a>
+              )}
 
               {/* Creator details */}
               {challenge.creator && (
                 <div style={{ marginBottom: '2rem', fontSize: '0.8rem', color: 'var(--text-muted)' }}>
                   Challenge Contributor: <span style={{ color: 'var(--cyber-purple)', fontWeight: 700 }}>{challenge.creator.name}</span>
                 </div>
+              )}
+
+              {fileAsset && (
+                <a
+                  href={fileAsset.url}
+                  download={fileAsset.name}
+                  target="_blank"
+                  rel="noreferrer"
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '1rem',
+                    marginBottom: '2rem',
+                    padding: '0.9rem 1rem',
+                    background: 'rgba(0, 243, 255, 0.06)',
+                    border: '1px solid rgba(0, 243, 255, 0.25)',
+                    borderRadius: '0.5rem',
+                    color: 'var(--cyber-cyan)',
+                    fontFamily: 'var(--font-orbitron)',
+                    fontSize: '0.78rem',
+                    fontWeight: 800,
+                    letterSpacing: '0.5px'
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
+                    <Paperclip size={16} />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {fileAsset.name}
+                    </span>
+                  </span>
+                  <Download size={16} style={{ flexShrink: 0 }} />
+                </a>
               )}
 
               {/* Flag Submission Form or Solved State */}
@@ -271,7 +336,7 @@ const ChallengeModal = ({ challenge, isOpen, onClose, onSolve, isSolved, current
                     <Flag size={16} style={{ position: 'absolute', left: '1rem', top: '50%', transform: 'translateY(-50%)', color: 'var(--cyber-cyan)' }} />
                     <input
                       type="text"
-                      placeholder="Cyber{flag_here}"
+                      placeholder="Cyber{flag_here} or MUCTF{flag_here}"
                       value={inputFlag}
                       onChange={(e) => setInputFlag(e.target.value)}
                       required
@@ -476,11 +541,13 @@ const ChallengeModal = ({ challenge, isOpen, onClose, onSolve, isSolved, current
 const ContributeModal = ({ isOpen, onClose, onRefresh }) => {
   const [title, setTitle] = useState('');
   const [description, setDescription] = useState('');
+  const [url, setUrl] = useState('');
   const [category, setCategory] = useState('Web');
   const [difficulty, setDifficulty] = useState('Easy');
   const [points, setPoints] = useState(100);
   const [flag, setFlag] = useState('');
   const [hint, setHint] = useState('');
+  const [attachment, setAttachment] = useState(null);
   const [error, setError] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
@@ -488,8 +555,8 @@ const ContributeModal = ({ isOpen, onClose, onRefresh }) => {
     e.preventDefault();
     if (submitting) return;
 
-    if (!flag.startsWith('Cyber{') || !flag.endsWith('}')) {
-      setError('Flag must be of the form Cyber{flag_content}');
+    if (!/^(Cyber|MUCTF)\{.*\}$/.test(flag)) {
+      setError('Flag must be of the form Cyber{flag_content} or MUCTF{flag_content}');
       return;
     }
 
@@ -499,20 +566,24 @@ const ContributeModal = ({ isOpen, onClose, onRefresh }) => {
       await api.createChallenge({
         title,
         description,
+        url,
         category,
         difficulty,
         points: Number(points),
         flag,
-        hint
+        hint,
+        attachment
       });
       // Clear forms
       setTitle('');
       setDescription('');
+      setUrl('');
       setCategory('Web');
       setDifficulty('Easy');
       setPoints(100);
       setFlag('');
       setHint('');
+      setAttachment(null);
       onRefresh();
       onClose();
     } catch (err) {
@@ -607,6 +678,17 @@ const ContributeModal = ({ isOpen, onClose, onRefresh }) => {
               </div>
 
               <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.4rem', fontFamily: 'var(--font-orbitron)' }}>Challenge URL (Optional)</label>
+                <input
+                  type="url"
+                  value={url}
+                  onChange={(e) => setUrl(e.target.value)}
+                  placeholder="https://example.com/challenge"
+                  style={{ width: '100%', padding: '0.6rem 0.8rem', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: 'white' }}
+                />
+              </div>
+
+              <div>
                 <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.4rem', fontFamily: 'var(--font-orbitron)' }}>Hint for Players (Optional)</label>
                 <input
                   type="text"
@@ -615,6 +697,59 @@ const ContributeModal = ({ isOpen, onClose, onRefresh }) => {
                   placeholder="e.g. Check details or metadata..."
                   style={{ width: '100%', padding: '0.6rem 0.8rem', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: 'white' }}
                 />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.4rem', fontFamily: 'var(--font-orbitron)' }}>Challenge File (Optional)</label>
+                <label
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '1rem',
+                    width: '100%',
+                    padding: '0.75rem 0.8rem',
+                    background: 'rgba(0,0,0,0.3)',
+                    border: '1px dashed rgba(0, 243, 255, 0.25)',
+                    borderRadius: '0.5rem',
+                    color: attachment ? 'white' : 'var(--text-muted)',
+                    cursor: 'pointer',
+                    fontSize: '0.85rem'
+                  }}
+                >
+                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
+                    <Upload size={16} color="var(--cyber-cyan)" />
+                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                      {attachment ? attachment.name : 'Attach a file for players to download'}
+                    </span>
+                  </span>
+                  {attachment && (
+                    <button
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        setAttachment(null);
+                      }}
+                      style={{
+                        background: 'transparent',
+                        color: 'var(--cyber-pink)',
+                        border: 'none',
+                        padding: 0,
+                        lineHeight: 0
+                      }}
+                    >
+                      <X size={16} />
+                    </button>
+                  )}
+                  <input
+                    type="file"
+                    onChange={(e) => setAttachment(e.target.files?.[0] || null)}
+                    style={{ display: 'none' }}
+                  />
+                </label>
+                <p style={{ marginTop: '0.4rem', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
+                  Max upload size: 10 MB
+                </p>
               </div>
 
               <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
@@ -665,7 +800,7 @@ const ContributeModal = ({ isOpen, onClose, onRefresh }) => {
                     value={flag}
                     onChange={(e) => setFlag(e.target.value)}
                     required
-                    placeholder="Cyber{flag}"
+                    placeholder="Cyber{flag} or MUCTF{flag}"
                     style={{ width: '100%', padding: '0.6rem 0.8rem', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: 'white' }}
                   />
                 </div>
