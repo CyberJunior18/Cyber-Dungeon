@@ -9,6 +9,7 @@ import Leaderboard from './components/Leaderboard';
 import Lessons from './components/Lessons';
 import LessonDetail from './components/LessonDetail';
 import Profile from './components/Profile';
+import CreateChallenge from './components/CreateChallenge';
 import { api } from './api';
 
 function App() {
@@ -19,7 +20,7 @@ function App() {
   const [view, setView] = useState(() => {
     const savedView = localStorage.getItem('cyber_view') || 'landing';
     const token = api.getToken();
-    const protectedViews = ['dashboard', 'profile'];
+    const protectedViews = ['dashboard', 'profile', 'create-challenge'];
     if (protectedViews.includes(savedView) && !token) {
       return 'landing';
     }
@@ -56,7 +57,7 @@ function App() {
           setView('landing');
         });
     } else {
-      const protectedViews = ['dashboard', 'profile'];
+      const protectedViews = ['dashboard', 'profile', 'create-challenge'];
       if (protectedViews.includes(view)) {
         setView('landing');
       }
@@ -126,7 +127,25 @@ function App() {
               exit={{ opacity: 0, y: -20 }}
               transition={{ duration: 0.5 }}
             >
-              <Challenges currentUser={user} onPointsUpdate={handlePointsUpdate} solvedChallenges={user?.solved_challenges || []} />
+              <Challenges 
+                currentUser={user} 
+                onPointsUpdate={handlePointsUpdate} 
+                solvedChallenges={user?.solved_challenges || []} 
+                onNavigateToCreate={() => setView('create-challenge')}
+              />
+            </motion.div>
+          ) : view === 'create-challenge' ? (
+            <motion.div
+              key="create-challenge"
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -20 }}
+              transition={{ duration: 0.5 }}
+            >
+              <CreateChallenge 
+                currentUser={user} 
+                onBack={() => setView('dashboard')} 
+              />
             </motion.div>
           ) : view === 'lessons' ? (
             <motion.div

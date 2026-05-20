@@ -29,6 +29,7 @@ const getChallengeFiles = (challengeId) => {
 
 const ChallengeCard = ({ challenge, onClick, isSolved }) => {
   const IconComponent = getCategoryIcon(challenge.category);
+  const isPending = !challenge.is_approved;
 
   return (
     <motion.div
@@ -37,7 +38,9 @@ const ChallengeCard = ({ challenge, onClick, isSolved }) => {
       onClick={onClick}
       style={{
         padding: '2rem',
-        borderColor: isSolved ? 'rgba(57, 255, 20, 0.2)' : 'rgba(255, 255, 255, 0.1)',
+        borderColor: isPending 
+          ? 'rgba(255, 0, 85, 0.3)' 
+          : (isSolved ? 'rgba(57, 255, 20, 0.2)' : 'rgba(255, 255, 255, 0.1)'),
         background: 'var(--glass-bg)',
         position: 'relative',
         overflow: 'hidden',
@@ -46,7 +49,9 @@ const ChallengeCard = ({ challenge, onClick, isSolved }) => {
       }}
       whileHover={{
         scale: 1.02,
-        boxShadow: isSolved ? '0 0 30px rgba(57, 255, 20, 0.3)' : '0 0 30px rgba(0, 243, 255, 0.3)'
+        boxShadow: isPending
+          ? '0 0 30px rgba(255, 0, 85, 0.2)'
+          : (isSolved ? '0 0 30px rgba(57, 255, 20, 0.3)' : '0 0 30px rgba(0, 243, 255, 0.3)')
       }}
       whileTap={{ scale: 0.98 }}
     >
@@ -56,16 +61,16 @@ const ChallengeCard = ({ challenge, onClick, isSolved }) => {
             padding: '0.75rem',
             background: 'rgba(255, 255, 255, 0.03)',
             borderRadius: '0.75rem',
-            border: '1px solid ' + (isSolved ? 'rgba(57, 255, 20, 0.2)' : 'rgba(255, 255, 255, 0.1)')
+            border: '1px solid ' + (isPending ? 'rgba(255, 0, 85, 0.3)' : (isSolved ? 'rgba(57, 255, 20, 0.2)' : 'rgba(255, 255, 255, 0.1)'))
           }}>
-            <IconComponent size={24} color={isSolved ? 'rgb(57, 255, 20)' : 'var(--cyber-purple)'} />
+            <IconComponent size={24} color={isPending ? 'var(--cyber-pink)' : (isSolved ? 'rgb(57, 255, 20)' : 'var(--cyber-purple)')} />
           </div>
 
           <div>
             <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
               {challenge.category} • {challenge.difficulty}
             </span>
-            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+            <h3 style={{ fontSize: '1.25rem', fontWeight: 800, display: 'flex', alignItems: 'center', gap: '0.5rem', flexWrap: 'wrap' }}>
               {challenge.title}
               {isSolved && (
                 <span style={{
@@ -82,12 +87,27 @@ const ChallengeCard = ({ challenge, onClick, isSolved }) => {
                   SOLVED
                 </span>
               )}
+              {isPending && (
+                <span style={{
+                  fontSize: '0.65rem',
+                  padding: '0.15rem 0.4rem',
+                  background: 'rgba(255, 0, 85, 0.1)',
+                  border: '1px solid var(--cyber-pink)',
+                  color: 'var(--cyber-pink)',
+                  borderRadius: '3px',
+                  fontFamily: 'var(--font-orbitron)',
+                  textShadow: '0 0 5px rgba(255, 0, 85, 0.5)',
+                  fontWeight: 800
+                }}>
+                  PENDING APPROVAL
+                </span>
+              )}
             </h3>
           </div>
         </div>
 
         <div style={{ textAlign: 'right' }}>
-          <div className={isSolved ? 'neon-text-green' : 'neon-text-purple'} style={{ fontWeight: 900, fontSize: '1.2rem', color: isSolved ? 'rgb(57, 255, 20)' : undefined }}>{challenge.points}</div>
+          <div className={isPending ? 'neon-text-pink' : (isSolved ? 'neon-text-green' : 'neon-text-purple')} style={{ fontWeight: 900, fontSize: '1.2rem', color: isPending ? 'var(--cyber-pink)' : (isSolved ? 'rgb(57, 255, 20)' : undefined) }}>{challenge.points}</div>
           <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>PTS</span>
         </div>
       </div>
@@ -163,6 +183,34 @@ const ChallengeModal = ({ challenge, isOpen, onClose, onSolve, isSolved, current
     } finally {
       setDeleting(false);
     }
+  };
+
+  const handleShowHint = async () => {
+    if (!showHint && !challenge.viewed_hint) {
+      const confirmHint = window.confirm("Viewing the hint will reduce your points for this challenge by 50%. Proceed?");
+      if (!confirmHint) return;
+      try {
+        await api.logHintView(challenge.id);
+        challenge.viewed_hint = true;
+      } catch (err) {
+        console.error("Failed to log hint view:", err);
+      }
+    }
+    setShowHint(!showHint);
+  };
+
+  const handleShowAnswer = async () => {
+    if (!showAnswer && !challenge.viewed_answer) {
+      const confirmAnswer = window.confirm("Revealing the answer will set your points earned for this challenge to 0. Proceed?");
+      if (!confirmAnswer) return;
+      try {
+        await api.logAnswerView(challenge.id);
+        challenge.viewed_answer = true;
+      } catch (err) {
+        console.error("Failed to log answer view:", err);
+      }
+    }
+    setShowAnswer(!showAnswer);
   };
 
   return (
@@ -406,7 +454,7 @@ const ChallengeModal = ({ challenge, isOpen, onClose, onSolve, isSolved, current
             }}>
               <button
                 type="button"
-                onClick={() => setShowHint(!showHint)}
+                onClick={handleShowHint}
                 style={{
                   padding: '0.6rem 0.8rem',
                   background: showHint ? 'rgba(0, 243, 255, 0.15)' : 'rgba(255, 255, 255, 0.05)',
@@ -424,7 +472,7 @@ const ChallengeModal = ({ challenge, isOpen, onClose, onSolve, isSolved, current
                   textAlign: 'center'
                 }}
               >
-                {showHint ? '✕ Hide Hint' : '? Show Hint'}
+                {showHint ? '✕ Hide Hint' : (challenge.viewed_hint ? '? Show Hint' : '? Hint (-50% pts)')}
               </button>
 
               {showHint && (
@@ -448,12 +496,12 @@ const ChallengeModal = ({ challenge, isOpen, onClose, onSolve, isSolved, current
                 </motion.div>
               )}
 
-              {/* Reveal Flag/Answer Button - ADMIN ONLY */}
-              {currentUser && currentUser.role === 'admin' && (
+              {/* Reveal Flag/Answer Button - Available to all logged-in players */}
+              {currentUser && (
                 <>
                   <button
                     type="button"
-                    onClick={() => setShowAnswer(!showAnswer)}
+                    onClick={handleShowAnswer}
                     style={{
                       padding: '0.6rem 0.8rem',
                       background: showAnswer ? 'rgba(57, 255, 20, 0.15)' : 'rgba(255, 255, 255, 0.05)',
@@ -471,7 +519,7 @@ const ChallengeModal = ({ challenge, isOpen, onClose, onSolve, isSolved, current
                       textAlign: 'center'
                     }}
                   >
-                    {showAnswer ? '✕ Hide Answer' : '🔑 View Answer'}
+                    {showAnswer ? '✕ Hide Answer' : (challenge.viewed_answer ? '🔑 Show Answer' : '🔑 Answer (0 pts)')}
                   </button>
 
                   {showAnswer && (
@@ -828,13 +876,12 @@ const ContributeModal = ({ isOpen, onClose, onRefresh }) => {
   );
 };
 
-const Challenges = ({ currentUser, onPointsUpdate, solvedChallenges = [] }) => {
+const Challenges = ({ currentUser, onPointsUpdate, solvedChallenges = [], onNavigateToCreate }) => {
   const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
   const [filter, setFilter] = useState('All');
   const [selectedChallenge, setSelectedChallenge] = useState(null);
   const [modalOpen, setModalOpen] = useState(false);
-  const [contributeOpen, setContributeOpen] = useState(false);
 
   const fetchChallenges = async () => {
     try {
@@ -851,9 +898,16 @@ const Challenges = ({ currentUser, onPointsUpdate, solvedChallenges = [] }) => {
     fetchChallenges();
   }, []);
 
+  const isAdmin = currentUser && currentUser.role === 'admin';
+
+  // For admins, separate pending challenges from approved challenges
+  // For others, all returned challenges from backend (approved + their own pending) are shown in main list
+  const pendingChallenges = isAdmin ? challenges.filter(c => !c.is_approved) : [];
+  const approvedChallenges = isAdmin ? challenges.filter(c => c.is_approved) : challenges;
+
   const filteredChallenges = filter === 'All'
-    ? challenges
-    : challenges.filter(c => c.category === filter);
+    ? approvedChallenges
+    : approvedChallenges.filter(c => c.category === filter);
 
   const handleChallengeClick = (challenge) => {
     setSelectedChallenge(challenge);
@@ -883,6 +937,142 @@ const Challenges = ({ currentUser, onPointsUpdate, solvedChallenges = [] }) => {
             boxShadow: '0 0 15px rgba(0, 243, 255, 0.5)'
           }}></div>
         </div>
+
+        {/* Admin Pending Approvals Dashboard */}
+        {isAdmin && pendingChallenges.length > 0 && (
+          <div style={{
+            marginBottom: '5rem',
+            padding: '2.5rem',
+            background: 'rgba(255, 170, 0, 0.02)',
+            border: '1px solid rgba(255, 170, 0, 0.15)',
+            borderRadius: '1rem',
+            boxShadow: '0 0 40px rgba(255, 170, 0, 0.05)'
+          }}>
+            <h3 style={{
+              fontSize: '1.4rem',
+              fontWeight: 900,
+              marginBottom: '2rem',
+              fontFamily: 'var(--font-orbitron)',
+              color: '#ffaa00',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.75rem',
+              letterSpacing: '1px'
+            }}>
+              <AlertTriangle color="#ffaa00" size={24} /> PENDING CTF LAB APPROVALS
+            </h3>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '2rem' }}>
+              {pendingChallenges.map(pendingChallenge => (
+                <div 
+                  key={pendingChallenge.id} 
+                  className="glass-card animate-glow-pulse" 
+                  style={{ 
+                    padding: '2rem', 
+                    display: 'flex', 
+                    flexDirection: 'column', 
+                    justifyContent: 'space-between', 
+                    borderColor: 'rgba(255, 170, 0, 0.25)',
+                    background: 'rgba(5, 5, 5, 0.85)'
+                  }}
+                >
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem', alignItems: 'center' }}>
+                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1.5px', fontFamily: 'var(--font-orbitron)' }}>
+                        {pendingChallenge.category} • {pendingChallenge.difficulty}
+                      </span>
+                      <span style={{ fontSize: '0.9rem', color: '#ffaa00', fontWeight: 900, fontFamily: 'var(--font-orbitron)' }}>
+                        {pendingChallenge.points} PTS
+                      </span>
+                    </div>
+                    <h4 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.75rem', color: 'white' }}>
+                      {pendingChallenge.title}
+                    </h4>
+                    <p style={{ 
+                      fontSize: '0.9rem', 
+                      color: 'var(--text-muted)', 
+                      lineHeight: 1.5,
+                      marginBottom: '1.5rem', 
+                      display: '-webkit-box', 
+                      WebkitLineClamp: 3, 
+                      WebkitBoxOrient: 'vertical', 
+                      overflow: 'hidden' 
+                    }}>
+                      {pendingChallenge.description}
+                    </p>
+                    {pendingChallenge.creator && (
+                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '2rem' }}>
+                        Contributor: <span style={{ color: 'var(--cyber-purple)', fontWeight: 700 }}>{pendingChallenge.creator.name}</span>
+                      </div>
+                    )}
+                  </div>
+                  <div style={{ display: 'flex', gap: '1rem' }}>
+                    <button 
+                      onClick={async () => {
+                        if (window.confirm(`Approve "${pendingChallenge.title}"? It will go live immediately.`)) {
+                          try {
+                            await api.approveChallenge(pendingChallenge.id);
+                            fetchChallenges();
+                          } catch (err) {
+                            alert(err.message || 'Failed to approve challenge');
+                          }
+                        }
+                      }}
+                      className="btn-primary" 
+                      style={{ 
+                        flex: 1, 
+                        padding: '0.75rem', 
+                        fontSize: '0.8rem', 
+                        fontFamily: 'var(--font-orbitron)', 
+                        fontWeight: 800,
+                        background: 'linear-gradient(135deg, rgb(57, 255, 20) 0%, rgb(0, 200, 0) 100%)', 
+                        border: 'none', 
+                        boxShadow: '0 0 15px rgba(57, 255, 20, 0.25)',
+                        cursor: 'pointer'
+                      }}
+                    >
+                      APPROVE
+                    </button>
+                    <button 
+                      onClick={async () => {
+                        if (window.confirm(`Reject and delete "${pendingChallenge.title}" permanently?`)) {
+                          try {
+                            await api.deleteChallenge(pendingChallenge.id);
+                            fetchChallenges();
+                          } catch (err) {
+                            alert(err.message || 'Failed to reject challenge');
+                          }
+                        }
+                      }}
+                      style={{ 
+                        flex: 1, 
+                        padding: '0.75rem', 
+                        fontSize: '0.8rem', 
+                        fontFamily: 'var(--font-orbitron)', 
+                        fontWeight: 800,
+                        background: 'rgba(255, 0, 85, 0.05)', 
+                        border: '1px solid var(--cyber-pink)', 
+                        color: 'var(--cyber-pink)', 
+                        borderRadius: '0.5rem', 
+                        cursor: 'pointer',
+                        transition: 'all 0.3s ease'
+                      }}
+                      onMouseEnter={(e) => {
+                        e.target.style.background = 'rgba(255, 0, 85, 0.15)';
+                        e.target.style.boxShadow = '0 0 15px rgba(255, 0, 85, 0.3)';
+                      }}
+                      onMouseLeave={(e) => {
+                        e.target.style.background = 'rgba(255, 0, 85, 0.05)';
+                        e.target.style.boxShadow = 'none';
+                      }}
+                    >
+                      REJECT
+                    </button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
 
         {/* Filters */}
         <div style={{ display: 'flex', justifyContent: 'center', gap: '1rem', flexWrap: 'wrap', marginBottom: '4rem' }}>
@@ -932,7 +1122,7 @@ const Challenges = ({ currentUser, onPointsUpdate, solvedChallenges = [] }) => {
               <motion.div
                 layout
                 className="glass-card"
-                onClick={() => setContributeOpen(true)}
+                onClick={onNavigateToCreate}
                 style={{
                   padding: '2rem',
                   border: '2px dashed rgba(188, 19, 254, 0.4)',
@@ -987,12 +1177,6 @@ const Challenges = ({ currentUser, onPointsUpdate, solvedChallenges = [] }) => {
           isSolved={selectedChallenge && solvedChallenges.includes(selectedChallenge.id)}
           currentUser={currentUser}
           onDeleteSuccess={fetchChallenges}
-        />
-
-        <ContributeModal
-          isOpen={contributeOpen}
-          onClose={() => setContributeOpen(false)}
-          onRefresh={fetchChallenges}
         />
       </div>
     </section>

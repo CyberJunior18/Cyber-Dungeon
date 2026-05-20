@@ -10,7 +10,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        DefaultChallenges::seed();
+        // Seeding moved to 09_add_url_to_challenges_table to ensure the 'url' column is added first
     }
 
     /**

@@ -19,7 +19,7 @@ return new class extends Migration
             $table->string('difficulty');
             $table->integer('points');
             $table->string('flag');
-            $table->string('hint')->nullable();
+            $table->text('hint')->nullable();
             $table->foreignId('creator_id')->nullable()->constrained('users')->onDelete('cascade');
             $table->timestamps();
         });

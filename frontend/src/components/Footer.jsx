@@ -27,9 +27,10 @@ const Footer = () => {
           <div>
             <h4 style={{ fontSize: '0.875rem', fontWeight: 700, textTransform: 'uppercase', marginBottom: '1.5rem', letterSpacing: '2px' }}>Resources</h4>
             <ul style={{ listStyle: 'none', display: 'flex', flexDirection: 'column', gap: '1rem', color: 'var(--text-muted)', fontSize: '0.9rem' }}>
-              <li><a href="#" style={{ transition: 'color 0.3s' }} onMouseEnter={e => e.target.style.color = 'var(--cyber-cyan)'} onMouseLeave={e => e.target.style.color = 'var(--text-muted)'}>Whitepaper</a></li>
-              <li><a href="#" style={{ transition: 'color 0.3s' }} onMouseEnter={e => e.target.style.color = 'var(--cyber-cyan)'} onMouseLeave={e => e.target.style.color = 'var(--text-muted)'}>Documentation</a></li>
-              <li><a href="#" style={{ transition: 'color 0.3s' }} onMouseEnter={e => e.target.style.color = 'var(--cyber-cyan)'} onMouseLeave={e => e.target.style.color = 'var(--text-muted)'}>API Reference</a></li>
+              <li><a href="https://portswigger.net/web-security" target="_blank" rel="noreferrer" style={{ transition: 'color 0.3s' }} onMouseEnter={e => e.target.style.color = 'var(--cyber-cyan)'} onMouseLeave={e => e.target.style.color = 'var(--text-muted)'}>PortSwigger Academy</a></li>
+              <li><a href="https://owasp.org" target="_blank" rel="noreferrer" style={{ transition: 'color 0.3s' }} onMouseEnter={e => e.target.style.color = 'var(--cyber-cyan)'} onMouseLeave={e => e.target.style.color = 'var(--text-muted)'}>OWASP Top 10</a></li>
+              <li><a href="https://gchq.github.io/CyberChef/" target="_blank" rel="noreferrer" style={{ transition: 'color 0.3s' }} onMouseEnter={e => e.target.style.color = 'var(--cyber-cyan)'} onMouseLeave={e => e.target.style.color = 'var(--text-muted)'}>CyberChef Utility</a></li>
+              <li><a href="https://ctftime.org" target="_blank" rel="noreferrer" style={{ transition: 'color 0.3s' }} onMouseEnter={e => e.target.style.color = 'var(--cyber-cyan)'} onMouseLeave={e => e.target.style.color = 'var(--text-muted)'}>CTFtime Schedule</a></li>
             </ul>
           </div>
 

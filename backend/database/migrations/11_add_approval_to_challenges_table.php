@@ -12,11 +12,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('challenges', function (Blueprint $table) {
-            $table->string('url', 2048)->nullable()->after('description');
+            $table->boolean('is_approved')->default(true)->after('points');
         });
-
-        // Seed default challenges now that all required columns are created
-        \App\Support\DefaultChallenges::seed();
     }
 
     /**
@@ -25,7 +22,7 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('challenges', function (Blueprint $table) {
-            $table->dropColumn('url');
+            $table->dropColumn('is_approved');
         });
     }
 };

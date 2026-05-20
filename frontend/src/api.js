@@ -208,4 +208,32 @@ export const api = {
     }
     return data;
   },
+
+  logHintView: async (challengeId) => {
+    const response = await fetch(`${API_URL}/challenges/${challengeId}/view-hint`, {
+      method: 'POST',
+      headers: getHeaders(),
+    });
+    return await response.json();
+  },
+
+  logAnswerView: async (challengeId) => {
+    const response = await fetch(`${API_URL}/challenges/${challengeId}/view-answer`, {
+      method: 'POST',
+      headers: getHeaders(),
+    });
+    return await response.json();
+  },
+
+  approveChallenge: async (challengeId) => {
+    const response = await fetch(`${API_URL}/challenges/${challengeId}/approve`, {
+      method: 'POST',
+      headers: getHeaders(),
+    });
+    const data = await response.json();
+    if (!response.ok) {
+      throw new Error(data.message || 'Failed to approve challenge');
+    }
+    return data;
+  },
 };

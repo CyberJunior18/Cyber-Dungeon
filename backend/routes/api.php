@@ -186,22 +186,39 @@ Route::middleware('auth:sanctum')->group(function () {
         ]);
 
         if ($isCorrect) {
-            // Check if player has already solved this challenge correctly before
-            $alreadySolvedCount = Submission::where('user_id', $user->id)
-                ->where('challenge_id', $challenge->id)
-                ->where('is_correct', true)
-                ->count();
+            // Find or create the user challenge state
+            $state = \App\Models\ChallengeUserState::firstOrCreate(
+                ['user_id' => $user->id, 'challenge_id' => $challenge->id]
+            );
 
-            if ($alreadySolvedCount === 1) { // this was the first correct one!
-                // If a privileged user made the challenge, their points won't be appended (no self-solve points!)
-                if ($challenge->creator_id !== $user->id) {
-                    $user->points += $challenge->points;
-                    $user->save();
+            if (!$state->is_solved) {
+                $pointsToAward = $challenge->points;
+
+                // Points rules:
+                if ($challenge->creator_id === $user->id) {
+                    $pointsToAward = 0; // creator receives no points
+                    $state->viewed_answer = true;
+                } elseif ($state->viewed_answer) {
+                    $pointsToAward = 0; // viewed answer receives 0 points
+                } elseif ($state->viewed_hint) {
+                    $pointsToAward = (int) floor($challenge->points / 2); // viewed hint receives half points
                 }
+
+                $state->is_solved = true;
+                $state->points_awarded = $pointsToAward;
+                $state->save();
+
+                $user->points += $pointsToAward;
+                $user->save();
             }
         }
 
-        $solved = Submission::where('user_id', $user->id)->where('is_correct', true)->pluck('challenge_id')->toArray();
+        // Return solved challenges using state or submissions
+        $solved = \App\Models\ChallengeUserState::where('user_id', $user->id)
+            ->where('is_solved', true)
+            ->pluck('challenge_id')
+            ->toArray();
+
         return response()->json([
             'username' => $user->name,
             'email' => $user->email,
@@ -251,12 +268,50 @@ Route::middleware('auth:sanctum')->group(function () {
             'category' => $validated['category'],
             'difficulty' => $validated['difficulty'],
             'points' => $validated['points'],
+            'is_approved' => ($user->role === 'admin'), // auto-approve admins, pending for creators
             'flag' => $validated['flag'],
             'creator_id' => $user->id,
             'hint' => $validated['hint'] ?? null,
         ] + $attachmentData);
 
         return response()->json($challenge->load('creator')->append('attachment_url'));
+    });
+
+    // Hint and Answer Views Recording APIs
+    Route::post('/challenges/{id}/view-hint', function (Request $request, $id) {
+        $user = $request->user();
+        $state = \App\Models\ChallengeUserState::firstOrCreate(
+            ['user_id' => $user->id, 'challenge_id' => $id]
+        );
+        $state->viewed_hint = true;
+        $state->save();
+
+        return response()->json(['message' => 'Hint viewed recorded']);
+    });
+
+    Route::post('/challenges/{id}/view-answer', function (Request $request, $id) {
+        $user = $request->user();
+        $state = \App\Models\ChallengeUserState::firstOrCreate(
+            ['user_id' => $user->id, 'challenge_id' => $id]
+        );
+        $state->viewed_answer = true;
+        $state->save();
+
+        return response()->json(['message' => 'Answer viewed recorded']);
+    });
+
+    // Admin Challenge Approval Route
+    Route::post('/challenges/{id}/approve', function (Request $request, $id) {
+        $user = $request->user();
+        if ($user->role !== 'admin') {
+            return response()->json(['message' => 'Unauthorized'], 403);
+        }
+
+        $challenge = Challenge::findOrFail($id);
+        $challenge->is_approved = true;
+        $challenge->save();
+
+        return response()->json(['message' => 'Challenge approved successfully', 'challenge' => $challenge]);
     });
 
     Route::delete('/challenges/{id}', function (Request $request, $id) {
@@ -266,19 +321,22 @@ Route::middleware('auth:sanctum')->group(function () {
             return response()->json(['message' => 'Unauthorized deletion'], 403);
         }
 
-        // Find all users who solved this challenge correctly and subtract points
-        $solverUserIds = Submission::where('challenge_id', $challenge->id)
-            ->where('is_correct', true)
-            ->pluck('user_id')
-            ->unique();
+        // Deduct points only from those who solved it and exactly by the amount they took from it
+        $userStates = \App\Models\ChallengeUserState::where('challenge_id', $challenge->id)
+            ->where('is_solved', true)
+            ->get();
 
-        foreach ($solverUserIds as $solverId) {
-            $solver = User::find($solverId);
+        foreach ($userStates as $state) {
+            $solver = User::find($state->user_id);
             if ($solver) {
-                $solver->points = max(0, $solver->points - $challenge->points);
+                $solver->points = max(0, $solver->points - $state->points_awarded);
                 $solver->save();
             }
         }
+
+        // Delete submissions and states to automatically decrement solved amount/lists
+        Submission::where('challenge_id', $challenge->id)->delete();
+        \App\Models\ChallengeUserState::where('challenge_id', $challenge->id)->delete();
 
         if ($challenge->attachment_path) {
             Storage::disk('public')->delete($challenge->attachment_path);
@@ -348,11 +406,43 @@ Route::middleware('auth:sanctum')->group(function () {
     });
 });
 
-Route::get('/challenges', function () {
+Route::get('/challenges', function (Request $request) {
     ensureAdminSeeded();
     DefaultChallenges::seed();
 
-    return response()->json(Challenge::with('creator')->get()->append('attachment_url'));
+    $user = $request->user('sanctum');
+    $query = Challenge::with('creator');
+
+    if (!$user) {
+        // Guests only see approved ones
+        $query->where('is_approved', true);
+    } elseif ($user->role === 'admin') {
+        // Admin sees all (both pending and approved)
+    } else {
+        // Creators see all approved challenges OR their own pending challenges
+        $query->where(function ($q) use ($user) {
+            $q->where('is_approved', true)
+              ->orWhere('creator_id', $user->id);
+        });
+    }
+
+    $challenges = $query->get()->append('attachment_url');
+
+    if ($user) {
+        $states = \App\Models\ChallengeUserState::where('user_id', $user->id)->get()->keyBy('challenge_id');
+        foreach ($challenges as $c) {
+            $state = $states->get($c->id);
+            $c->viewed_hint = $state ? (bool)$state->viewed_hint : false;
+            $c->viewed_answer = $state ? (bool)$state->viewed_answer : false;
+        }
+    } else {
+        foreach ($challenges as $c) {
+            $c->viewed_hint = false;
+            $c->viewed_answer = false;
+        }
+    }
+
+    return response()->json($challenges);
 });
 
 Route::get('/challenges/{challenge}/attachment', function (Challenge $challenge) {

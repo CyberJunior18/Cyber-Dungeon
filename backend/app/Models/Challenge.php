@@ -22,6 +22,7 @@ class Challenge extends Model
         'category',
         'difficulty',
         'points',
+        'is_approved',
         'flag',
         'creator_id',
         'hint',
