@@ -193,7 +193,8 @@ button {
   transition: width 0.3s ease;
 }
 
-.nav-link:hover::after {
+.nav-link:hover::after,
+.nav-link.active::after {
   width: 100%;
 }
 
@@ -289,7 +290,7 @@ button {
 
 .features-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 340px), 1fr));
   gap: 2.5rem;
   margin-top: 5rem;
 }
@@ -330,9 +331,27 @@ button {
 
 .footer-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 240px), 1fr));
   gap: 4rem;
   margin-bottom: 6rem;
+}
+
+/* Responsive Helper Classes */
+.challenges-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(min(100%, 380px), 1fr));
+}
+
+.challenge-modal-card {
+  padding: 2.5rem;
+  display: grid;
+  grid-template-columns: 1fr 220px;
+  gap: 2.5rem;
+}
+
+.create-challenge-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
 }
 
 @media (max-width: 968px) {
@@ -346,5 +365,53 @@ button {
   
   .container {
     padding: 0 1.5rem;
+  }
+}
+
+@media (max-width: 768px) {
+  .challenge-modal-card {
+    grid-template-columns: 1fr;
+    padding: 1.5rem;
+    gap: 1.5rem;
+  }
+  
+  .home-title {
+    font-size: clamp(2.5rem, 8vw, 3.5rem);
+  }
+}
+
+@media (max-width: 600px) {
+  .create-challenge-grid {
+    grid-template-columns: 1fr;
+    gap: 1.25rem;
+  }
+}
+
+@media (max-width: 480px) {
+  .container {
+    padding: 0 1rem;
+  }
+  
+  .home-section {
+    padding: 6rem 0 3rem;
+  }
+  
+  .features-section,
+  .footer,
+  #challenges,
+  #leaderboard,
+  #lessons {
+    padding: 5rem 0 2.5rem !important;
+  }
+  
+  .feature-card {
+    padding: 2rem;
+  }
+  
+  .btn-primary,
+  .btn-outline {
+    width: 100%;
+    text-align: center;
+    justify-content: center;
   }
 }

@@ -237,7 +237,7 @@ const LessonDetail = ({ lessonTitle, onBack }) => {
               <IconComponent size={32} color={lesson.color} />
             </div>
 
-            <div style={{ flex: 1, minWidth: '300px' }}>
+            <div style={{ flex: 1, minWidth: 'min(100%, 300px)' }}>
               <p style={{ color: lesson.color, fontSize: '0.78rem', fontFamily: 'var(--font-orbitron)', fontWeight: 900, letterSpacing: '2px', textTransform: 'uppercase', marginBottom: '0.75rem' }}>
                 Learning Track
               </p>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Shield, Terminal, Database, Cpu, Globe, ChevronRight, X, Flag, AlertTriangle, Plus, Key, Trash2, Upload, Download, Paperclip, ExternalLink } from 'lucide-react';
+import { Shield, Terminal, Database, Cpu, Globe, ChevronRight, X, Flag, AlertTriangle, Plus, Key, Trash2, Download, Paperclip, ExternalLink } from 'lucide-react';
 import { api } from '../api';
 import encFlagUrl from '../assets/enc_flag.txt?url';
 import gardenUrl from '../assets/garden.jpg?url';
@@ -243,15 +243,11 @@ const ChallengeModal = ({ challenge, isOpen, onClose, onSolve, isSolved, current
             initial={{ scale: 0.9, opacity: 0, y: 20 }}
             animate={{ scale: 1, opacity: 1, y: 0 }}
             exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="glass-card"
+            className="glass-card challenge-modal-card"
             style={{
               maxWidth: '900px',
               width: 'min(95vw, 900px)',
               position: 'relative',
-              padding: '2.5rem',
-              display: 'grid',
-              gridTemplateColumns: '1fr 220px',
-              gap: '2.5rem',
               alignItems: 'start',
               background: 'rgba(5, 5, 5, 0.95)'
             }}
@@ -586,296 +582,6 @@ const ChallengeModal = ({ challenge, isOpen, onClose, onSolve, isSolved, current
   );
 };
 
-const ContributeModal = ({ isOpen, onClose, onRefresh }) => {
-  const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
-  const [url, setUrl] = useState('');
-  const [category, setCategory] = useState('Web');
-  const [difficulty, setDifficulty] = useState('Easy');
-  const [points, setPoints] = useState(100);
-  const [flag, setFlag] = useState('');
-  const [hint, setHint] = useState('');
-  const [attachment, setAttachment] = useState(null);
-  const [error, setError] = useState('');
-  const [submitting, setSubmitting] = useState(false);
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (submitting) return;
-
-    if (!/^(Cyber|MUCTF)\{.*\}$/.test(flag)) {
-      setError('Flag must be of the form Cyber{flag_content} or MUCTF{flag_content}');
-      return;
-    }
-
-    try {
-      setSubmitting(true);
-      setError('');
-      await api.createChallenge({
-        title,
-        description,
-        url,
-        category,
-        difficulty,
-        points: Number(points),
-        flag,
-        hint,
-        attachment
-      });
-      // Clear forms
-      setTitle('');
-      setDescription('');
-      setUrl('');
-      setCategory('Web');
-      setDifficulty('Easy');
-      setPoints(100);
-      setFlag('');
-      setHint('');
-      setAttachment(null);
-      onRefresh();
-      onClose();
-    } catch (err) {
-      setError(err.message || 'Failed to add challenge');
-    } finally {
-      setSubmitting(false);
-    }
-  };
-
-  return (
-    <AnimatePresence>
-      {isOpen && (
-        <div style={{
-          position: 'fixed',
-          width: '100%',
-          inset: 0,
-          zIndex: 2000,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          padding: '1rem'
-        }}>
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            onClick={onClose}
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'rgba(0, 0, 0, 0.8)',
-              backdropFilter: 'blur(8px)'
-            }}
-          />
-
-          <motion.div
-            initial={{ scale: 0.9, opacity: 0, y: 20 }}
-            animate={{ scale: 1, opacity: 1, y: 0 }}
-            exit={{ scale: 0.9, opacity: 0, y: 20 }}
-            className="glass-card"
-            style={{
-              maxWidth: '600px',
-              width: '100%',
-              position: 'relative',
-              padding: '2.5rem',
-              background: 'rgba(5, 5, 5, 0.95)',
-              borderColor: 'var(--cyber-purple)',
-              boxShadow: 'var(--neon-purple-shadow)'
-            }}
-          >
-            <button
-              onClick={onClose}
-              style={{
-                position: 'absolute',
-                top: '1.25rem',
-                right: '1.25rem',
-                background: 'transparent',
-                border: 'none',
-                color: 'var(--text-muted)',
-                cursor: 'pointer'
-              }}
-            >
-              <X size={20} />
-            </button>
-
-            <h3 style={{ fontSize: '1.5rem', fontWeight: 950, marginBottom: '1.5rem', letterSpacing: '1px', fontFamily: 'var(--font-orbitron)', color: 'white' }}>
-              ADD NEW <span className="neon-text-purple">CHALLENGE</span>
-            </h3>
-
-            <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.4rem', fontFamily: 'var(--font-orbitron)' }}>Challenge Title</label>
-                <input
-                  type="text"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  required
-                  placeholder="e.g. SQL Injection Lab"
-                  style={{ width: '100%', padding: '0.6rem 0.8rem', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: 'white' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.4rem', fontFamily: 'var(--font-orbitron)' }}>Description & Lore</label>
-                <textarea
-                  value={description}
-                  onChange={(e) => setDescription(e.target.value)}
-                  required
-                  placeholder="Details of the challenge and flag hint..."
-                  style={{ width: '100%', minHeight: '80px', padding: '0.6rem 0.8rem', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: 'white', resize: 'vertical' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.4rem', fontFamily: 'var(--font-orbitron)' }}>Challenge URL (Optional)</label>
-                <input
-                  type="url"
-                  value={url}
-                  onChange={(e) => setUrl(e.target.value)}
-                  placeholder="https://example.com/challenge"
-                  style={{ width: '100%', padding: '0.6rem 0.8rem', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: 'white' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.4rem', fontFamily: 'var(--font-orbitron)' }}>Hint for Players (Optional)</label>
-                <input
-                  type="text"
-                  value={hint}
-                  onChange={(e) => setHint(e.target.value)}
-                  placeholder="e.g. Check details or metadata..."
-                  style={{ width: '100%', padding: '0.6rem 0.8rem', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: 'white' }}
-                />
-              </div>
-
-              <div>
-                <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.4rem', fontFamily: 'var(--font-orbitron)' }}>Challenge File (Optional)</label>
-                <label
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'space-between',
-                    gap: '1rem',
-                    width: '100%',
-                    padding: '0.75rem 0.8rem',
-                    background: 'rgba(0,0,0,0.3)',
-                    border: '1px dashed rgba(0, 243, 255, 0.25)',
-                    borderRadius: '0.5rem',
-                    color: attachment ? 'white' : 'var(--text-muted)',
-                    cursor: 'pointer',
-                    fontSize: '0.85rem'
-                  }}
-                >
-                  <span style={{ display: 'flex', alignItems: 'center', gap: '0.6rem', minWidth: 0 }}>
-                    <Upload size={16} color="var(--cyber-cyan)" />
-                    <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-                      {attachment ? attachment.name : 'Attach a file for players to download'}
-                    </span>
-                  </span>
-                  {attachment && (
-                    <button
-                      type="button"
-                      onClick={(e) => {
-                        e.preventDefault();
-                        setAttachment(null);
-                      }}
-                      style={{
-                        background: 'transparent',
-                        color: 'var(--cyber-pink)',
-                        border: 'none',
-                        padding: 0,
-                        lineHeight: 0
-                      }}
-                    >
-                      <X size={16} />
-                    </button>
-                  )}
-                  <input
-                    type="file"
-                    onChange={(e) => setAttachment(e.target.files?.[0] || null)}
-                    style={{ display: 'none' }}
-                  />
-                </label>
-                <p style={{ marginTop: '0.4rem', color: 'var(--text-muted)', fontSize: '0.7rem' }}>
-                  Max upload size: 10 MB
-                </p>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.4rem', fontFamily: 'var(--font-orbitron)' }}>Category</label>
-                  <select
-                    value={category}
-                    onChange={(e) => setCategory(e.target.value)}
-                    style={{ width: '100%', padding: '0.6rem 0.8rem', background: 'rgba(5,5,5,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: 'white' }}
-                  >
-                    <option value="Web">Web</option>
-                    <option value="Crypto">Crypto</option>
-                    <option value="Forensics">Forensics</option>
-                    <option value="General Knowledge">General Knowledge</option>
-                  </select>
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.4rem', fontFamily: 'var(--font-orbitron)' }}>Difficulty</label>
-                  <select
-                    value={difficulty}
-                    onChange={(e) => setDifficulty(e.target.value)}
-                    style={{ width: '100%', padding: '0.6rem 0.8rem', background: 'rgba(5,5,5,0.95)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: 'white' }}
-                  >
-                    <option value="Easy">Easy</option>
-                    <option value="Medium">Medium</option>
-                    <option value="Hard">Hard</option>
-                  </select>
-                </div>
-              </div>
-
-              <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '1rem' }}>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.4rem', fontFamily: 'var(--font-orbitron)' }}>Points Value</label>
-                  <input
-                    type="number"
-                    value={points}
-                    onChange={(e) => setPoints(e.target.value)}
-                    required
-                    min="50"
-                    max="1000"
-                    style={{ width: '100%', padding: '0.6rem 0.8rem', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: 'white' }}
-                  />
-                </div>
-                <div>
-                  <label style={{ display: 'block', fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.4rem', fontFamily: 'var(--font-orbitron)' }}>Secret Flag Key</label>
-                  <input
-                    type="text"
-                    value={flag}
-                    onChange={(e) => setFlag(e.target.value)}
-                    required
-                    placeholder="Cyber{flag} or MUCTF{flag}"
-                    style={{ width: '100%', padding: '0.6rem 0.8rem', background: 'rgba(0,0,0,0.3)', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '0.5rem', color: 'white' }}
-                  />
-                </div>
-              </div>
-
-              {error && (
-                <div style={{ color: 'var(--cyber-pink)', fontSize: '0.8rem', padding: '0.5rem', background: 'rgba(255, 105, 180, 0.05)', border: '1px solid rgba(255, 105, 180, 0.2)', borderRadius: '0.25rem' }}>
-                  {error}
-                </div>
-              )}
-
-              <button
-                type="submit"
-                className="btn-primary"
-                disabled={submitting}
-                style={{ width: '100%', marginTop: '1rem', padding: '0.75rem', fontFamily: 'var(--font-orbitron)', fontWeight: 800 }}
-              >
-                {submitting ? 'SAVING CHALLENGE...' : 'CREATE CHALLENGE'}
-              </button>
-            </form>
-          </motion.div>
-        </div>
-      )}
-    </AnimatePresence>
-  );
-};
-
 const Challenges = ({ currentUser, onPointsUpdate, solvedChallenges = [], onNavigateToCreate }) => {
   const [challenges, setChallenges] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -961,115 +667,241 @@ const Challenges = ({ currentUser, onPointsUpdate, solvedChallenges = [], onNavi
             }}>
               <AlertTriangle color="#ffaa00" size={24} /> PENDING CTF LAB APPROVALS
             </h3>
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(360px, 1fr))', gap: '2rem' }}>
-              {pendingChallenges.map(pendingChallenge => (
-                <div 
-                  key={pendingChallenge.id} 
-                  className="glass-card animate-glow-pulse" 
-                  style={{ 
-                    padding: '2rem', 
-                    display: 'flex', 
-                    flexDirection: 'column', 
-                    justifyContent: 'space-between', 
-                    borderColor: 'rgba(255, 170, 0, 0.25)',
-                    background: 'rgba(5, 5, 5, 0.85)'
-                  }}
-                >
-                  <div>
-                    <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.25rem', alignItems: 'center' }}>
-                      <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1.5px', fontFamily: 'var(--font-orbitron)' }}>
-                        {pendingChallenge.category} • {pendingChallenge.difficulty}
-                      </span>
-                      <span style={{ fontSize: '0.9rem', color: '#ffaa00', fontWeight: 900, fontFamily: 'var(--font-orbitron)' }}>
-                        {pendingChallenge.points} PTS
-                      </span>
-                    </div>
-                    <h4 style={{ fontSize: '1.25rem', fontWeight: 800, marginBottom: '0.75rem', color: 'white' }}>
-                      {pendingChallenge.title}
-                    </h4>
-                    <p style={{ 
-                      fontSize: '0.9rem', 
-                      color: 'var(--text-muted)', 
-                      lineHeight: 1.5,
-                      marginBottom: '1.5rem', 
-                      display: '-webkit-box', 
-                      WebkitLineClamp: 3, 
-                      WebkitBoxOrient: 'vertical', 
-                      overflow: 'hidden' 
-                    }}>
-                      {pendingChallenge.description}
-                    </p>
-                    {pendingChallenge.creator && (
-                      <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '2rem' }}>
-                        Contributor: <span style={{ color: 'var(--cyber-purple)', fontWeight: 700 }}>{pendingChallenge.creator.name}</span>
+            <div className="challenges-grid" style={{ gap: '2rem' }}>
+              {pendingChallenges.map(pendingChallenge => {
+                const IconComponent = getCategoryIcon(pendingChallenge.category);
+                const fileAsset = pendingChallenge.attachment_url
+                  ? {
+                      url: pendingChallenge.attachment_url,
+                      name: pendingChallenge.attachment_name || 'challenge-file',
+                      size: pendingChallenge.attachment_size,
+                    }
+                  : getChallengeFiles(pendingChallenge.id);
+
+                return (
+                  <div 
+                    key={pendingChallenge.id} 
+                    className="glass-card animate-glow-pulse" 
+                    style={{ 
+                      padding: '2rem', 
+                      display: 'flex', 
+                      flexDirection: 'column', 
+                      justifyContent: 'space-between', 
+                      borderColor: 'rgba(255, 170, 0, 0.25)',
+                      background: 'rgba(5, 5, 5, 0.85)'
+                    }}
+                  >
+                    <div>
+                      {/* Header matching normal ChallengeCard */}
+                      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '1.5rem' }}>
+                        <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                          <div style={{
+                            padding: '0.75rem',
+                            background: 'rgba(255, 255, 255, 0.03)',
+                            borderRadius: '0.75rem',
+                            border: '1px solid rgba(255, 170, 0, 0.25)'
+                          }}>
+                            <IconComponent size={24} color="#ffaa00" />
+                          </div>
+
+                          <div>
+                            <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', textTransform: 'uppercase', letterSpacing: '1px' }}>
+                              {pendingChallenge.category} • {pendingChallenge.difficulty}
+                            </span>
+                            <h4 style={{ fontSize: '1.25rem', fontWeight: 800, marginTop: '0.25rem', color: 'white' }}>
+                              {pendingChallenge.title}
+                            </h4>
+                          </div>
+                        </div>
+
+                        <div style={{ textAlign: 'right' }}>
+                          <div style={{ fontWeight: 900, fontSize: '1.2rem', color: '#ffaa00', fontFamily: 'var(--font-orbitron)' }}>
+                            {pendingChallenge.points}
+                          </div>
+                          <span style={{ fontSize: '0.6rem', color: 'var(--text-muted)' }}>PTS</span>
+                        </div>
                       </div>
-                    )}
-                  </div>
-                  <div style={{ display: 'flex', gap: '1rem' }}>
-                    <button 
-                      onClick={async () => {
-                        if (window.confirm(`Approve "${pendingChallenge.title}"? It will go live immediately.`)) {
-                          try {
-                            await api.approveChallenge(pendingChallenge.id);
-                            fetchChallenges();
-                          } catch (err) {
-                            alert(err.message || 'Failed to approve challenge');
+
+                      {/* Description */}
+                      <p style={{ 
+                        fontSize: '0.95rem', 
+                        color: 'var(--text-muted)', 
+                        lineHeight: 1.6,
+                        marginBottom: '1.5rem'
+                      }}>
+                        {pendingChallenge.description}
+                      </p>
+
+                      {/* Target Laboratory URL */}
+                      {pendingChallenge.url && (
+                        <div style={{ marginBottom: '1.5rem' }}>
+                          <a
+                            href={pendingChallenge.url}
+                            target="_blank"
+                            rel="noreferrer"
+                            style={{
+                              display: 'inline-flex',
+                              alignItems: 'center',
+                              gap: '0.5rem',
+                              color: '#ffaa00',
+                              fontSize: '0.9rem',
+                              fontWeight: 800,
+                              textDecoration: 'underline',
+                              textUnderlineOffset: '4px',
+                              overflowWrap: 'anywhere'
+                            }}
+                          >
+                            {pendingChallenge.url}
+                            <ExternalLink size={14} />
+                          </a>
+                        </div>
+                      )}
+
+                      {/* Contributor details */}
+                      {pendingChallenge.creator && (
+                        <div style={{ fontSize: '0.8rem', color: 'var(--text-muted)', marginBottom: '1.5rem' }}>
+                          Contributor: <span style={{ color: 'var(--cyber-purple)', fontWeight: 700 }}>{pendingChallenge.creator.name}</span>
+                        </div>
+                      )}
+
+                      {/* File attachment */}
+                      {fileAsset && (
+                        <a
+                          href={fileAsset.url}
+                          download={fileAsset.name}
+                          target="_blank"
+                          rel="noreferrer"
+                          style={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'space-between',
+                            gap: '1rem',
+                            marginBottom: '1.5rem',
+                            padding: '0.9rem 1rem',
+                            background: 'rgba(255, 170, 0, 0.06)',
+                            border: '1px solid rgba(255, 170, 0, 0.25)',
+                            borderRadius: '0.5rem',
+                            color: '#ffaa00',
+                            fontFamily: 'var(--font-orbitron)',
+                            fontSize: '0.78rem',
+                            fontWeight: 800,
+                            letterSpacing: '0.5px'
+                          }}
+                        >
+                          <span style={{ display: 'flex', alignItems: 'center', gap: '0.65rem', minWidth: 0 }}>
+                            <Paperclip size={16} />
+                            <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                              {fileAsset.name}
+                            </span>
+                          </span>
+                          <Download size={16} style={{ flexShrink: 0 }} />
+                        </a>
+                      )}
+
+                      {/* Hint details */}
+                      {pendingChallenge.hint && (
+                        <div style={{
+                          padding: '0.75rem 1rem',
+                          background: 'rgba(255, 170, 0, 0.08)',
+                          border: '1px solid rgba(255, 170, 0, 0.3)',
+                          borderRadius: '0.5rem',
+                          color: 'var(--text-muted)',
+                          fontSize: '0.8rem',
+                          lineHeight: 1.4,
+                          fontFamily: 'var(--font-body)',
+                          marginBottom: '1.5rem'
+                        }}>
+                          <span style={{ color: '#ffaa00', fontWeight: 800, fontFamily: 'var(--font-orbitron)', marginRight: '0.5rem' }}>HINT:</span>
+                          {pendingChallenge.hint}
+                        </div>
+                      )}
+
+                      {/* Flag details */}
+                      {pendingChallenge.flag && (
+                        <div style={{
+                          padding: '0.75rem 1rem',
+                          background: 'rgba(255, 170, 0, 0.08)',
+                          border: '1px solid rgba(255, 170, 0, 0.3)',
+                          borderRadius: '0.5rem',
+                          color: '#ffaa00',
+                          fontSize: '0.8rem',
+                          fontWeight: 800,
+                          fontFamily: 'var(--font-orbitron)',
+                          marginBottom: '1.5rem',
+                          wordBreak: 'break-all'
+                        }}>
+                          <span style={{ color: '#ffaa00', fontWeight: 800, marginRight: '0.5rem' }}>FLAG:</span>
+                          {pendingChallenge.flag}
+                        </div>
+                      )}
+                    </div>
+
+                    <div style={{ display: 'flex', gap: '1rem', marginTop: '1rem' }}>
+                      <button 
+                        onClick={async () => {
+                          if (window.confirm(`Approve "${pendingChallenge.title}"? It will go live immediately.`)) {
+                            try {
+                              await api.approveChallenge(pendingChallenge.id);
+                              fetchChallenges();
+                            } catch (err) {
+                              alert(err.message || 'Failed to approve challenge');
+                            }
                           }
-                        }
-                      }}
-                      className="btn-primary" 
-                      style={{ 
-                        flex: 1, 
-                        padding: '0.75rem', 
-                        fontSize: '0.8rem', 
-                        fontFamily: 'var(--font-orbitron)', 
-                        fontWeight: 800,
-                        background: 'linear-gradient(135deg, rgb(57, 255, 20) 0%, rgb(0, 200, 0) 100%)', 
-                        border: 'none', 
-                        boxShadow: '0 0 15px rgba(57, 255, 20, 0.25)',
-                        cursor: 'pointer'
-                      }}
-                    >
-                      APPROVE
-                    </button>
-                    <button 
-                      onClick={async () => {
-                        if (window.confirm(`Reject and delete "${pendingChallenge.title}" permanently?`)) {
-                          try {
-                            await api.deleteChallenge(pendingChallenge.id);
-                            fetchChallenges();
-                          } catch (err) {
-                            alert(err.message || 'Failed to reject challenge');
+                        }}
+                        className="btn-primary" 
+                        style={{ 
+                          flex: 1, 
+                          padding: '0.75rem', 
+                          fontSize: '0.8rem', 
+                          fontFamily: 'var(--font-orbitron)', 
+                          fontWeight: 800,
+                          background: 'linear-gradient(135deg, rgb(57, 255, 20) 0%, rgb(0, 200, 0) 100%)', 
+                          border: 'none', 
+                          boxShadow: '0 0 15px rgba(57, 255, 20, 0.25)',
+                          cursor: 'pointer'
+                        }}
+                      >
+                        APPROVE
+                      </button>
+                      <button 
+                        onClick={async () => {
+                          if (window.confirm(`Reject and delete "${pendingChallenge.title}" permanently?`)) {
+                            try {
+                              await api.deleteChallenge(pendingChallenge.id);
+                              fetchChallenges();
+                            } catch (err) {
+                              alert(err.message || 'Failed to reject challenge');
+                            }
                           }
-                        }
-                      }}
-                      style={{ 
-                        flex: 1, 
-                        padding: '0.75rem', 
-                        fontSize: '0.8rem', 
-                        fontFamily: 'var(--font-orbitron)', 
-                        fontWeight: 800,
-                        background: 'rgba(255, 0, 85, 0.05)', 
-                        border: '1px solid var(--cyber-pink)', 
-                        color: 'var(--cyber-pink)', 
-                        borderRadius: '0.5rem', 
-                        cursor: 'pointer',
-                        transition: 'all 0.3s ease'
-                      }}
-                      onMouseEnter={(e) => {
-                        e.target.style.background = 'rgba(255, 0, 85, 0.15)';
-                        e.target.style.boxShadow = '0 0 15px rgba(255, 0, 85, 0.3)';
-                      }}
-                      onMouseLeave={(e) => {
-                        e.target.style.background = 'rgba(255, 0, 85, 0.05)';
-                        e.target.style.boxShadow = 'none';
-                      }}
-                    >
-                      REJECT
-                    </button>
+                        }}
+                        style={{ 
+                          flex: 1, 
+                          padding: '0.75rem', 
+                          fontSize: '0.8rem', 
+                          fontFamily: 'var(--font-orbitron)', 
+                          fontWeight: 800,
+                          background: 'rgba(255, 0, 85, 0.05)', 
+                          border: '1px solid var(--cyber-pink)', 
+                          color: 'var(--cyber-pink)', 
+                          borderRadius: '0.5rem', 
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease'
+                        }}
+                        onMouseEnter={(e) => {
+                          e.target.style.background = 'rgba(255, 0, 85, 0.15)';
+                          e.target.style.boxShadow = '0 0 15px rgba(255, 0, 85, 0.3)';
+                        }}
+                        onMouseLeave={(e) => {
+                          e.target.style.background = 'rgba(255, 0, 85, 0.05)';
+                          e.target.style.boxShadow = 'none';
+                        }}
+                      >
+                        REJECT
+                      </button>
+                    </div>
                   </div>
-                </div>
-              ))}
+                );
+              })}
             </div>
           </div>
         )}
@@ -1108,7 +940,7 @@ const Challenges = ({ currentUser, onPointsUpdate, solvedChallenges = [], onNavi
             NO ACTIVE CHALLENGES DETECTED IN THIS CATEGORY.
           </div>
         ) : (
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: '2rem' }}>
+          <div className="challenges-grid" style={{ gap: '2rem' }}>
             {filteredChallenges.map(challenge => (
               <ChallengeCard
                 key={challenge.id}

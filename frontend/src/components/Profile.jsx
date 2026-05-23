@@ -391,7 +391,9 @@ const Profile = ({ user, onUserUpdate, onLogout, onViewChange }) => {
                             padding: '1rem',
                             background: 'rgba(0,0,0,0.3)',
                             border: '1px solid rgba(255,255,255,0.05)',
-                            borderRadius: '0.5rem'
+                            borderRadius: '0.5rem',
+                            flexWrap: 'wrap',
+                            gap: '1rem'
                           }}
                         >
                           <div style={{ display: 'flex', alignItems: 'center', gap: '1rem' }}>

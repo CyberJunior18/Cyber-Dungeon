@@ -174,10 +174,9 @@ Route::middleware('auth:sanctum')->group(function () {
 
         $user = $request->user();
         $challenge = Challenge::findOrFail($validated['challenge_id']);
-        
+
         $isCorrect = (trim($validated['flag']) === trim($challenge->flag));
 
-        // Create submission record
         Submission::create([
             'user_id' => $user->id,
             'challenge_id' => $challenge->id,
@@ -186,7 +185,6 @@ Route::middleware('auth:sanctum')->group(function () {
         ]);
 
         if ($isCorrect) {
-            // Find or create the user challenge state
             $state = \App\Models\ChallengeUserState::firstOrCreate(
                 ['user_id' => $user->id, 'challenge_id' => $challenge->id]
             );
@@ -194,14 +192,13 @@ Route::middleware('auth:sanctum')->group(function () {
             if (!$state->is_solved) {
                 $pointsToAward = $challenge->points;
 
-                // Points rules:
                 if ($challenge->creator_id === $user->id) {
-                    $pointsToAward = 0; // creator receives no points
+                    $pointsToAward = 0;
                     $state->viewed_answer = true;
                 } elseif ($state->viewed_answer) {
-                    $pointsToAward = 0; // viewed answer receives 0 points
+                    $pointsToAward = 0;
                 } elseif ($state->viewed_hint) {
-                    $pointsToAward = (int) floor($challenge->points / 2); // viewed hint receives half points
+                    $pointsToAward = (int) floor($challenge->points / 2);
                 }
 
                 $state->is_solved = true;
@@ -213,7 +210,6 @@ Route::middleware('auth:sanctum')->group(function () {
             }
         }
 
-        // Return solved challenges using state or submissions
         $solved = \App\Models\ChallengeUserState::where('user_id', $user->id)
             ->where('is_solved', true)
             ->pluck('challenge_id')
@@ -268,7 +264,7 @@ Route::middleware('auth:sanctum')->group(function () {
             'category' => $validated['category'],
             'difficulty' => $validated['difficulty'],
             'points' => $validated['points'],
-            'is_approved' => ($user->role === 'admin'), // auto-approve admins, pending for creators
+            'is_approved' => ($user->role === 'admin'),
             'flag' => $validated['flag'],
             'creator_id' => $user->id,
             'hint' => $validated['hint'] ?? null,
@@ -277,7 +273,6 @@ Route::middleware('auth:sanctum')->group(function () {
         return response()->json($challenge->load('creator')->append('attachment_url'));
     });
 
-    // Hint and Answer Views Recording APIs
     Route::post('/challenges/{id}/view-hint', function (Request $request, $id) {
         $user = $request->user();
         $state = \App\Models\ChallengeUserState::firstOrCreate(
@@ -300,7 +295,6 @@ Route::middleware('auth:sanctum')->group(function () {
         return response()->json(['message' => 'Answer viewed recorded']);
     });
 
-    // Admin Challenge Approval Route
     Route::post('/challenges/{id}/approve', function (Request $request, $id) {
         $user = $request->user();
         if ($user->role !== 'admin') {
@@ -352,7 +346,7 @@ Route::middleware('auth:sanctum')->group(function () {
         if ($user->role !== 'admin') {
             return response()->json(['message' => 'Unauthorized'], 403);
         }
-        
+
         $q = $request->query('q', '');
         if (strlen($q) < 1) {
             return response()->json([]);

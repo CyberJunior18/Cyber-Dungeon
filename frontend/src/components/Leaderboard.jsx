@@ -169,7 +169,7 @@ const Leaderboard = () => {
         </div>
 
         {/* List View with Pagination */}
-        <div className="glass-card" style={{ padding: '1rem', background: 'rgba(5, 5, 5, 0.5)', overflow: 'hidden' }}>
+        <div className="glass-card" style={{ padding: '1rem', background: 'rgba(5, 5, 5, 0.5)', overflowX: 'auto' }}>
           <div style={{ minWidth: '800px' }}>
             <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
               <thead>

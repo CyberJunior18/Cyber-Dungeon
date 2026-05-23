@@ -57,7 +57,6 @@ const Navbar = ({ user, points, onAuthClick, onLogout, view, onViewChange }) => 
               }}
             >
               {link.name}
-              {link.active && <span style={{ position: 'absolute', bottom: '-6px', left: 0, width: '100%', height: '2px', background: 'var(--cyber-cyan)', boxShadow: 'var(--neon-cyan-shadow)' }}></span>}
             </button>
           ))}
           
@@ -124,8 +123,28 @@ const Navbar = ({ user, points, onAuthClick, onLogout, view, onViewChange }) => 
           )}
         </div>
 
-        <div className="mobile-toggle" style={{ display: 'none' }}>
-          <button onClick={() => setIsOpen(!isOpen)} style={{ background: 'transparent', color: 'white', border: 'none' }}>
+        <div className="mobile-toggle" style={{ display: 'none', alignItems: 'center', gap: '1rem' }}>
+          {user && (
+            <div 
+              onClick={() => onViewChange('profile')}
+              style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                gap: '0.4rem', 
+                padding: '0.4rem 0.8rem', 
+                background: 'rgba(0, 243, 255, 0.05)', 
+                borderRadius: '2rem', 
+                border: '1px solid rgba(0, 243, 255, 0.2)',
+                cursor: 'pointer'
+              }}
+            >
+              <Award size={14} className="neon-text-cyan" />
+              <span style={{ fontSize: '0.75rem', fontWeight: 800, color: 'var(--cyber-cyan)', fontFamily: 'var(--font-orbitron)' }}>
+                {points} <span style={{ fontSize: '0.55rem', opacity: 0.7 }}>PTS</span>
+              </span>
+            </div>
+          )}
+          <button onClick={() => setIsOpen(!isOpen)} style={{ background: 'transparent', color: 'white', border: 'none', display: 'flex', alignItems: 'center', padding: 0 }}>
             {isOpen ? <X size={28} /> : <Menu size={28} />}
           </button>
         </div>
@@ -133,7 +152,7 @@ const Navbar = ({ user, points, onAuthClick, onLogout, view, onViewChange }) => 
 
       <style dangerouslySetInnerHTML={{ __html: `
         @media (max-width: 968px) {
-          .mobile-toggle { display: block !important; }
+          .mobile-toggle { display: flex !important; }
           .nav-links { display: none !important; }
         }
       `}} />
@@ -153,6 +172,45 @@ const Navbar = ({ user, points, onAuthClick, onLogout, view, onViewChange }) => 
           >
             <div className="container" style={{ padding: '2rem' }}>
               <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem' }}>
+                {user && (
+                  <div 
+                    onClick={() => { onViewChange('profile'); setIsOpen(false); }}
+                    style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '1rem', 
+                      cursor: 'pointer',
+                      padding: '0.5rem 0',
+                      borderBottom: '1px solid rgba(255, 255, 255, 0.05)',
+                      paddingBottom: '1.5rem'
+                    }}
+                  >
+                    <div style={{ 
+                      width: '3rem', 
+                      height: '3rem', 
+                      borderRadius: '50%', 
+                      background: 'var(--cyber-purple)', 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      justifyContent: 'center',
+                      border: '2px solid rgba(255, 255, 255, 0.1)',
+                      boxShadow: 'var(--neon-purple-shadow)',
+                      overflow: 'hidden'
+                    }}>
+                      {user.avatar ? (
+                        <img src={user.avatar} alt="avatar" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                      ) : (
+                        <User size={24} color="white" />
+                      )}
+                    </div>
+                    <div>
+                      <div style={{ fontSize: '1rem', fontWeight: 800, color: 'white' }}>{user.username}</div>
+                      <div style={{ fontSize: '0.75rem', color: 'var(--cyber-cyan)', fontFamily: 'var(--font-orbitron)' }}>
+                        {points} PTS
+                      </div>
+                    </div>
+                  </div>
+                )}
                 {navLinks.map((link) => (
                   <button
                     key={link.name}

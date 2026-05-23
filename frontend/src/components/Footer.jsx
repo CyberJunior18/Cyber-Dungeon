@@ -30,7 +30,7 @@ const Footer = () => {
               <li><a href="https://portswigger.net/web-security" target="_blank" rel="noreferrer" style={{ transition: 'color 0.3s' }} onMouseEnter={e => e.target.style.color = 'var(--cyber-cyan)'} onMouseLeave={e => e.target.style.color = 'var(--text-muted)'}>PortSwigger Academy</a></li>
               <li><a href="https://owasp.org" target="_blank" rel="noreferrer" style={{ transition: 'color 0.3s' }} onMouseEnter={e => e.target.style.color = 'var(--cyber-cyan)'} onMouseLeave={e => e.target.style.color = 'var(--text-muted)'}>OWASP Top 10</a></li>
               <li><a href="https://gchq.github.io/CyberChef/" target="_blank" rel="noreferrer" style={{ transition: 'color 0.3s' }} onMouseEnter={e => e.target.style.color = 'var(--cyber-cyan)'} onMouseLeave={e => e.target.style.color = 'var(--text-muted)'}>CyberChef Utility</a></li>
-              <li><a href="https://ctftime.org" target="_blank" rel="noreferrer" style={{ transition: 'color 0.3s' }} onMouseEnter={e => e.target.style.color = 'var(--cyber-cyan)'} onMouseLeave={e => e.target.style.color = 'var(--text-muted)'}>CTFtime Schedule</a></li>
+              <li><a href="https://www.hackthebox.com" target="_blank" rel="noreferrer" style={{ transition: 'color 0.3s' }} onMouseEnter={e => e.target.style.color = 'var(--cyber-cyan)'} onMouseLeave={e => e.target.style.color = 'var(--text-muted)'}>Hack The Box</a></li>
             </ul>
           </div>
 

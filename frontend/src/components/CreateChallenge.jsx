@@ -78,9 +78,7 @@ const CreateChallenge = ({ onBack, onRefresh, currentUser }) => {
       <button 
         onClick={onBack}
         style={{
-          display: 'inline-flex',
           alignItems: 'center',
-          gap: '0.5rem',
           background: 'transparent',
           border: 'none',
           color: 'var(--cyber-cyan)',
@@ -89,16 +87,18 @@ const CreateChallenge = ({ onBack, onRefresh, currentUser }) => {
           fontWeight: 700,
           fontSize: '0.85rem',
           textTransform: 'uppercase',
+          marginTop: '4rem',
           marginBottom: '2rem',
           transition: 'all 0.3s ease'
         }}
+        onMouseEnter={(e) => {
+          e.target.style.color = 'var(--cyber-purple)';
+        }}
+        onMouseLeave={(e) => {
+          e.target.style.color = 'var(--cyber-cyan)';
+        }}
         className="animate-glow-pulse"
       >
-        <br></br>
-        <br></br>
-        <br></br>
-        <br></br>
-        <br></br>
         <ArrowLeft size={16} /> BACK TO DASHBOARD
       </button>
 
@@ -236,7 +236,7 @@ const CreateChallenge = ({ onBack, onRefresh, currentUser }) => {
           </div>
 
           {/* Category, Difficulty & Points */}
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '1.5rem' }}>
+          <div className="create-challenge-grid" style={{ display: 'grid', gap: '1.5rem' }}>
             <div>
               <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: 700, textTransform: 'uppercase', color: 'var(--text-muted)', marginBottom: '0.5rem', fontFamily: 'var(--font-orbitron)' }}>Category</label>
               <select

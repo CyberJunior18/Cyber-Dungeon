@@ -16,9 +16,6 @@ class DefaultChallenges
         }
     }
 
-    /**
-     * @return array<int, array<string, mixed>>
-     */
     public static function all(): array
     {
         return [
