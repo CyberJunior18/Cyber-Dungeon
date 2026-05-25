@@ -9,11 +9,11 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\ValidationException;
-use App\Http\Controllers\Api\UserController;
- use App\Http\Controllers\Api\SubmissionController;
-use App\Http\Controllers\Api\ChallengeController as ApiChallengeController;
-use App\Http\Controllers\Api\AdminController;
-use App\Http\Controllers\Api\LeaderboardController;
+use App\Http\Controllers\UserController;
+ use App\Http\Controllers\SubmissionController;
+use App\Http\Controllers\ChallengeController as ApiChallengeController;
+use App\Http\Controllers\AdminController;
+use App\Http\Controllers\LeaderboardController;
 
 
 

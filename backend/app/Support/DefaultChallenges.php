@@ -34,7 +34,7 @@ class DefaultChallenges
                 'difficulty' => 'Easy',
                 'points' => 100,
                 'description' => 'You will find the flag after decrypting this: UQTWJ{j0lsl1gf_v3ujqhl3v_429sx00x}',
-                'flag' => 'Cyber{caesar_d3cr9pt3d_f0212758}',
+                'flag' => 'CYBER{r0tat1on_d3crypt3d_429af00f}',
                 'hint' => 'Sometimes rotation is right (ROT13 / Caesar Cipher)',
             ],
             [

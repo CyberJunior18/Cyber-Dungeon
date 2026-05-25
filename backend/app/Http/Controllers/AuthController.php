@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Controllers\Api;
+namespace App\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use App\Models\User;
 use App\Models\Submission;
+use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Validation\ValidationException;
@@ -40,7 +40,7 @@ class AuthController extends Controller
                 'points' => $user->points,
                 'avatar' => $user->avatar,
                 'role' => $user->role,
-                'can_create_challenges' => (bool)$user->can_create_challenges,
+                'can_create_challenges' => (bool) $user->can_create_challenges,
                 'solved_challenges' => [],
             ],
             'token' => $token,
@@ -76,7 +76,7 @@ class AuthController extends Controller
                 'points' => $user->points,
                 'avatar' => $user->avatar,
                 'role' => $user->role,
-                'can_create_challenges' => (bool)$user->can_create_challenges,
+                'can_create_challenges' => (bool) $user->can_create_challenges,
                 'solved_challenges' => $solved,
             ],
             'token' => $token,
@@ -86,6 +86,7 @@ class AuthController extends Controller
     public function logout(Request $request)
     {
         $request->user()->currentAccessToken()->delete();
+
         return response()->json(['message' => 'Logged out successfully']);
     }
 }
