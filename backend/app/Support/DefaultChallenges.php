@@ -75,6 +75,26 @@ class DefaultChallenges
                 'flag' => 'MUCTF{sql_1nj3ct10n_g03s_brrrr}',
                 'hint' => 'Not every feature on the portal is as secure as the login page. Try interacting with all of them. The table name is flags and the flag is on row secret. You cannot read data directly from this injection point, but you can ask the database a yes/no question and watch how the response changes. ORDER BY cannot be parameterized. A CASE WHEN expression inside it behaves like an if/else; true and false produce different row orders.',
             ],
+            [
+                'title' => 'Staff Portal',
+                'category' => 'Web',
+                'difficulty' => 'Medium',
+                'points' => 200,
+                'description' => 'An internal staff portal allows staff to log in. The login endpoint concatenates user input into SQL queries. Can you bypass authentication to retrieve the secret flag?',
+                'url' => '/challenges/challenge1',
+                'flag' => 'Cyber{sql_1nj3ct10n_byp4ss}',
+                'hint' => 'The login query is built with string concatenation. Try terminating the username with a single quote (\') and using SQL comment markers (--).',
+            ],
+            [
+                'title' => 'CorpReports Portal',
+                'category' => 'Web',
+                'difficulty' => 'Medium',
+                'points' => 200,
+                'description' => 'A corporate reporting portal hides the admin dashboard from the UI, but the backend only checks whether you are authenticated. Can you discover the open endpoint and recover the internal flag?',
+                'url' => '/challenges/challenge2',
+                'flag' => 'Cyber{bac_n0_p0l1cy_ch3ck}',
+                'hint' => 'The browser only shows your own reports. Look for another authenticated endpoint and keep your Bearer token handy.',
+            ],
         ];
     }
 }

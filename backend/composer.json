@@ -51,6 +51,10 @@
             "@php artisan config:clear --ansi @no_additional_args",
             "@php artisan test"
         ],
+        "challenge1:setup": [
+            "@php artisan migrate --path=database/migrations/challenges/challenge1 --force",
+            "@php artisan db:seed --class=Database\\\\Seeders\\\\Challenges\\\\Challenge1Seeder --force"
+        ],
         "post-autoload-dump": [
             "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
             "@php artisan package:discover --ansi"

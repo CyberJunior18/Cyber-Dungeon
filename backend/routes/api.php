@@ -45,4 +45,7 @@ Route::get('/challenges', [ApiChallengeController::class, 'index']);
 Route::get('/challenges/{challenge}/attachment', [ApiChallengeController::class, 'attachment']);
 Route::get('/leaderboard', [LeaderboardController::class, 'index']);
 
+require __DIR__.'/challengesRoutes/challenge1-api.php';
+require __DIR__.'/challengesRoutes/challenge2-api.php';
+
 require __DIR__.'/auth.php';
