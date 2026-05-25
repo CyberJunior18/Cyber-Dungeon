@@ -94,13 +94,6 @@
                 </section>
             </div>
 
-            <section class="surface-card p-3 hint-panel mt-3">
-                <div class="d-flex align-items-center justify-content-between gap-2 mb-3">
-                    <h3 class="h5 mb-0">Hints</h3>
-                    <button type="button" id="hint-btn" class="btn btn-ghost btn-sm">Load hints</button>
-                </div>
-                <ul id="hint-list" class="hint-list"></ul>
-            </section>
 
             <div id="dashboard-error" class="notice notice-error hidden" role="alert"></div>
             <div id="dashboard-success" class="notice notice-success hidden"></div>
