@@ -40,14 +40,5 @@ class Challenge1Controller extends Controller
         ]);
     }
 
-    public function hint()
-    {
-        return response()->json([
-            'hints' => [
-                'The login query is built with string concatenation.',
-                "Try terminating the string early with a single quote '",
-                'SQL comments can ignore the rest of a clause.',
-            ],
-        ]);
-    }
+
 }

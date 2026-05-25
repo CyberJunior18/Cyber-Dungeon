@@ -105,14 +105,5 @@ class Challenge2Controller extends Controller
             ->get();
     }
 
-    public function hint()
-    {
-        return response()->json([
-            'hints' => [
-                'The UI hides privileged actions, but hidden does not mean secured.',
-                'Inspect network endpoints and try authenticated requests manually.',
-                'Any valid bearer token can hit the admin reports endpoint in this challenge.',
-            ],
-        ]);
-    }
+
 }

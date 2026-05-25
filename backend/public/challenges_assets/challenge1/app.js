@@ -71,31 +71,4 @@ form.addEventListener('submit', async (event) => {
     }
 });
 
-hintBtn.addEventListener('click', async () => {
-    clearError();
 
-    try {
-        const response = await fetch('/api/challenge1/hint', {
-            method: 'GET',
-            headers: { 'Accept': 'application/json' },
-        });
-
-        const data = await response.json();
-
-        hintList.innerHTML = '';
-
-        if (!Array.isArray(data.hints)) {
-            return;
-        }
-
-        for (const hint of data.hints) {
-            const item = document.createElement('li');
-            item.textContent = `> ${hint}`;
-            hintList.appendChild(item);
-        }
-
-        hintBtn.textContent = 'Hints:';
-    } catch (error) {
-        showError('Could not load hints.');
-    }
-});
