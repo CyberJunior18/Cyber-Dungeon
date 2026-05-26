@@ -90,6 +90,41 @@ body {
 	gap: 0.85rem;
 }
 
+.profile-card-grid {
+	display: grid;
+	grid-template-columns: repeat(2, minmax(0, 1fr));
+	gap: 1rem;
+}
+
+.profile-item {
+	min-height: 120px;
+}
+
+.report-plus-btn {
+	width: 2.5rem;
+	height: 2.5rem;
+	padding: 0;
+	line-height: 1;
+	font-size: 1.5rem;
+}
+
+.reports-grid {
+	grid-template-columns: 1.2fr 1fr;
+}
+
+.report-popout {
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 1rem;
+	background: rgba(0, 0, 0, 0.28);
+	padding: 1rem;
+	box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
+	animation: riseIn 220ms ease;
+}
+
+.report-popout.hidden {
+	display: none !important;
+}
+
 .token-value {
 	display: block;
 	padding: 0.8rem;
@@ -153,7 +188,12 @@ body {
 }
 
 @media (max-width: 991.98px) {
+	.profile-card-grid,
 	.dashboard-grid {
+		grid-template-columns: 1fr;
+	}
+
+	.reports-grid {
 		grid-template-columns: 1fr;
 	}
 

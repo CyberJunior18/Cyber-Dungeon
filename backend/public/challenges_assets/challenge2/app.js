@@ -1,28 +1,35 @@
 const STORAGE_TOKEN = 'ch2_token';
 const STORAGE_USER = 'ch2_user';
 
+const currentPage = document.body.dataset.page || 'auth';
+
 const authShell = document.getElementById('auth-shell');
-const dashboardShell = document.getElementById('dashboard-shell');
+const profileShell = document.getElementById('profile-shell');
+const reportsShell = document.getElementById('reports-shell');
 const authForm = document.getElementById('auth-form');
 const authSubmit = document.getElementById('auth-submit');
 const authError = document.getElementById('auth-error');
 const dashboardError = document.getElementById('dashboard-error');
 const dashboardSuccess = document.getElementById('dashboard-success');
 const reportsList = document.getElementById('reports-list');
-const hintList = document.getElementById('hint-list');
 const tokenValue = document.getElementById('token-value');
 const sessionSummary = document.getElementById('session-summary');
 const reportForm = document.getElementById('report-form');
 const reportTitle = document.getElementById('report-title');
 const reportBody = document.getElementById('report-body');
-const hintBtn = document.getElementById('hint-btn');
 const refreshBtn = document.getElementById('refresh-btn');
-const logoutBtn = document.getElementById('logout-btn');
+const logoutBtns = Array.from(document.querySelectorAll('#logout-btn, #profile-logout-btn'));
+const reportOpenBtn = document.getElementById('report-open-btn');
+const reportCloseBtn = document.getElementById('report-close-btn');
+const reportPopout = document.getElementById('report-popout');
 const modeButtons = Array.from(document.querySelectorAll('.mode-btn'));
 const nameField = document.getElementById('name-field');
 const nameInput = document.getElementById('name');
 const emailInput = document.getElementById('email');
 const passwordInput = document.getElementById('password');
+const profileName = document.getElementById('profile-name');
+const profileEmail = document.getElementById('profile-email');
+const API_BASE = '/api/challenge2';
 
 let authMode = 'login';
 
@@ -71,6 +78,10 @@ function showSuccess(message) {
 function hideSuccess() {
 	dashboardSuccess.textContent = '';
 	dashboardSuccess.classList.add('hidden');
+}
+
+function goToPage(page) {
+	window.location.href = `/challenges/challenge2${page === 'auth' ? '' : `/${page}`}`;
 }
 
 function switchMode(nextMode) {
@@ -154,14 +165,7 @@ function renderReports(reports) {
 	}).join('');
 }
 
-function renderHints(hints) {
-	if (!Array.isArray(hints) || hints.length === 0) {
-		hintList.innerHTML = '';
-		return;
-	}
 
-	hintList.innerHTML = hints.map((hint) => `<li>${escapeHtml(hint)}</li>`).join('');
-}
 
 function escapeHtml(value) {
 	return String(value)
@@ -172,53 +176,86 @@ function escapeHtml(value) {
 		.replaceAll("'", '&#39;');
 }
 
-function enterDashboard(user) {
-	authShell.classList.add('hidden');
-	dashboardShell.classList.remove('hidden');
+function setPageVisibility(page) {
+	authShell.classList.toggle('hidden', page !== 'auth');
+	profileShell.classList.toggle('hidden', page !== 'profile');
+	reportsShell.classList.toggle('hidden', page !== 'reports');
+}
+
+function enterAuth() {
+	setPageVisibility('auth');
+	renderReports([]);
+	hideSuccess();
+}
+
+function enterProfile(user) {
+	setPageVisibility('profile');
+	tokenValue.textContent = getToken();
+	profileName.textContent = user?.name || 'User';
+	profileEmail.textContent = user?.email || 'unknown@example.com';
+}
+
+function enterReports(user) {
+	setPageVisibility('reports');
 	tokenValue.textContent = getToken();
 	sessionSummary.textContent = `${user?.name || 'User'} | ${user?.role || 'user'}`;
 }
 
-function enterAuth() {
-	dashboardShell.classList.add('hidden');
-	authShell.classList.remove('hidden');
-	renderReports([]);
-	renderHints([]);
-	hideSuccess();
+function closeReportPopout() {
+	if (reportPopout) {
+		reportPopout.classList.add('hidden');
+	}
+}
+
+function openReportPopout() {
+	if (reportPopout) {
+		reportPopout.classList.remove('hidden');
+	}
 }
 
 async function loadReports() {
 	try {
-		const reports = await requestJson('/api/challenge2/reports', { method: 'GET' });
+		const reports = await requestJson(`${API_BASE}/reports`, { method: 'GET' });
 		renderReports(reports);
 	} catch (error) {
 		showError(dashboardError, error.message || 'Unable to load reports.');
 	}
 }
 
-async function loadHints() {
-	try {
-		const data = await requestJson('/api/challenge2/hint', { method: 'GET' });
-		renderHints(data.hints || []);
-	} catch (error) {
-		showError(dashboardError, error.message || 'Unable to load hints.');
-	}
-}
+
 
 async function bootstrapSession() {
 	const token = getToken();
 	const user = getStoredUser();
 
 	if (!token) {
+		if (currentPage !== 'auth') {
+			goToPage('auth');
+			return;
+		}
 		enterAuth();
 		return;
 	}
 
 	try {
-		enterDashboard(user || { name: 'User', role: 'user' });
+		if (currentPage === 'auth') {
+			goToPage('profile');
+			return;
+		}
+
+		if (currentPage === 'profile') {
+			enterProfile(user || { name: 'User', email: 'unknown@example.com' });
+			return;
+		}
+
+		enterReports(user || { name: 'User', role: 'user' });
 		await loadReports();
 	} catch (error) {
 		clearStoredSession();
+		if (currentPage !== 'auth') {
+			goToPage('auth');
+			return;
+		}
 		enterAuth();
 		showError(authError, error.message || 'Session expired.');
 	}
@@ -232,7 +269,7 @@ authForm.addEventListener('submit', async (event) => {
 	event.preventDefault();
 	hideError(authError);
 
-	const endpoint = authMode === 'login' ? '/api/challenge2/login' : '/api/challenge2/register';
+	const endpoint = authMode === 'login' ? `${API_BASE}/login` : `${API_BASE}/register`;
 	const payload = authMode === 'register'
 		? {
 			name: nameInput.value.trim(),
@@ -254,8 +291,7 @@ authForm.addEventListener('submit', async (event) => {
 		});
 
 		setStoredSession(data.token, data.user);
-		enterDashboard(data.user);
-		await loadReports();
+		goToPage('profile');
 	} catch (error) {
 		showError(authError, error.message || 'Authentication failed.');
 	} finally {
@@ -264,40 +300,55 @@ authForm.addEventListener('submit', async (event) => {
 	}
 });
 
-reportForm.addEventListener('submit', async (event) => {
-	event.preventDefault();
-	hideError(dashboardError);
-	hideSuccess();
+if (reportForm) {
+	reportForm.addEventListener('submit', async (event) => {
+		event.preventDefault();
+		hideError(dashboardError);
+		hideSuccess();
 
-	try {
-		await requestJson('/api/challenge2/reports', {
-			method: 'POST',
-			body: JSON.stringify({
-				title: reportTitle.value.trim(),
-				body: reportBody.value.trim(),
-			}),
-		});
+		try {
+			await requestJson(`${API_BASE}/reports`, {
+				method: 'POST',
+				body: JSON.stringify({
+					title: reportTitle.value.trim(),
+					body: reportBody.value.trim(),
+				}),
+			});
 
-		reportTitle.value = '';
-		reportBody.value = '';
-		showSuccess('Report submitted. The dashboard still only shows your own entries.');
-		await loadReports();
-	} catch (error) {
-		showError(dashboardError, error.message || 'Unable to submit report.');
-	}
+			reportTitle.value = '';
+			reportBody.value = '';
+			closeReportPopout();
+			showSuccess('Report submitted. The dashboard still only shows your own entries.');
+			await loadReports();
+		} catch (error) {
+			showError(dashboardError, error.message || 'Unable to submit report.');
+		}
+	});
+}
+
+
+if (refreshBtn) {
+	refreshBtn.addEventListener('click', loadReports);
+}
+
+logoutBtns.forEach((button) => {
+	button.addEventListener('click', () => {
+		clearStoredSession();
+		switchMode('login');
+		emailInput.value = '';
+		passwordInput.value = '';
+		nameInput.value = '';
+		goToPage('auth');
+	});
 });
 
-hintBtn.addEventListener('click', loadHints);
-refreshBtn.addEventListener('click', loadReports);
+if (reportOpenBtn) {
+	reportOpenBtn.addEventListener('click', openReportPopout);
+}
 
-logoutBtn.addEventListener('click', () => {
-	clearStoredSession();
-	switchMode('login');
-	enterAuth();
-	emailInput.value = '';
-	passwordInput.value = '';
-	nameInput.value = '';
-});
+if (reportCloseBtn) {
+	reportCloseBtn.addEventListener('click', closeReportPopout);
+}
 
 switchMode('login');
 bootstrapSession();
